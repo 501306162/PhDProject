@@ -12,11 +12,16 @@ find_package(Qt4 REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 
+message(${QT_INCLUDE_DIR})
 
 include(${QT_USE_FILE})
 include(${ITK_USE_FILE})
-include(${EIGEN_USE_FILE})
 
+if(APPLE)
+	include_directories("/usr/local/include/eigen3")
+else()
+	include(${EIGEN_USE_FILE})
+endif()
 
 enable_testing()
 

@@ -6,7 +6,7 @@
 #include <itkImageRegionConstIterator.h>
 #include <MatrixCommon.h>
 
-#include <itkDiscreteHessianGaussianImageFunction.h>
+//#include <itkDiscreteHessianGaussianImageFunction.h>
 
 
 
@@ -56,6 +56,7 @@ void
 StructureTensorKeyPointValidator<TImageType>::
 Update()
 {
+	/**
 	typedef itk::DiscreteHessianGaussianImageFunction<ImageType> HessianFunctionType;
 	typename HessianFunctionType::Pointer hessianFunction = HessianFunctionType::New();
 	hessianFunction->SetInputImage(GetInput());
@@ -96,6 +97,7 @@ Update()
 		m_Valid = false;
 	}
 
+	*/
 }
 
 
