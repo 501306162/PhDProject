@@ -76,13 +76,24 @@ private:
 	 */
 	DicomImage BuildDicomImage(const std::string &filename, const gdcm::Scanner::TagToValue &mappings);
 
+	/**
+	 * Function to group the extracted images by series
+	 */
+	std::vector<DicomSeries> GroupSeries(const std::vector<DicomImage> &images);
+
+
+	/**
+	 * Function to check if the image satisfies the filter values
+	 */
+	bool FilterOnSeriesDescription(const std::string &description);
+
 
 	/**
 	 * Conversion functions to turn the strings to their appropriate values
 	 */
 	int ConvertInt(const std::string &value);
 	double ConvertDouble(const std::string &value);
-	int ConvertDoubleArray(const std::string &value, const unsigned int length);
+	std::vector<double> ConvertDoubleArray(const std::string &value);
 
 
 	std::string m_Directory;

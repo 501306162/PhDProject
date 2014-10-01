@@ -11,6 +11,8 @@ set(APP_NAMES
 	"FeatureLearning"
 	"NonRigidShapeAlignment"
 	"ThresholdFunction"
+	"CineExtractor"
+	"SortIRESOutput"
 	#"ContourExtraction"
 	)
 

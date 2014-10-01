@@ -2,6 +2,7 @@
 
 #include <gdcmDirectory.h>
 #include <QString>
+#include <QStringList>
 
 
 gdcm::Tag SeriesExtractor::seriesDescription = gdcm::Tag(0x0008,0x103e);
@@ -60,13 +61,52 @@ bool SeriesExtractor::ExtractSeries()
 	// extract all the relevant image tags
 	std::vector<DicomImage> images = ScanFiles(filenames);
 	
-	
-
+	// group the images into series
+	m_Series = GroupSeries(images);
 
 	return true;
 }
 
+// ------------------------------------------------------------------------
+std::vector<DicomSeries> SeriesExtractor::GroupSeries(const std::vector<DicomImage> &images)
+{
+	// group the images on the series number
+	typedef std::map<unsigned int, std::vector<DicomImage> > ImageMapType;
+	ImageMapType imageMap;
+	for(unsigned int i = 0; i < images.size(); i++)
+	{
+		if(imageMap.count(images[i].seriesNumber) == 0)
+		{
+			std::vector<DicomImage> imageSet;
+			imageSet.push_back(images[i]);
+			std::pair<unsigned int, std::vector<DicomImage> > newSet(images[i].seriesNumber, imageSet);
+			imageMap.insert(newSet);
+		}
+		else
+		{
+			imageMap[images[i].seriesNumber].push_back(images[i]);
+		}
+	}
 
+	// iterate through the image map and build the series data structure
+	std::vector<DicomSeries> seriesList;
+	
+	ImageMapType::iterator mapIt = imageMap.begin();
+	while(mapIt != imageMap.end())
+	{
+		DicomSeries series;
+		series.numImages = mapIt->second.size();
+		series.images = mapIt->second;
+		series.description = series.images.front().seriesDescription;
+		series.number = series.images.front().seriesNumber;
+
+		seriesList.push_back(series);
+		
+		++mapIt;
+	}
+	
+	return seriesList;
+}
 
 // ------------------------------------------------------------------------
 std::vector<DicomImage> SeriesExtractor::ScanFiles(const std::vector<std::string> &filenames)
@@ -92,6 +132,7 @@ std::vector<DicomImage> SeriesExtractor::ScanFiles(const std::vector<std::string
 	scanner.Scan(filenames);
 
 	gdcm::Scanner::MappingType mapping = scanner.GetMappings();
+	std::vector<DicomImage> images;
 
 	// assign the scanned values to the filenames to create the dicom images
 	for(unsigned int i = 0; i < filenames.size(); i++)
@@ -102,55 +143,72 @@ std::vector<DicomImage> SeriesExtractor::ScanFiles(const std::vector<std::string
 		// is this file an image
 		if(mapping[filenames[i].c_str()].count(instanceNumber) == 0) continue;
 
+		// check for the filtering based on series name
+		if(FilterOnSeriesDescription(mapping[filenames[i].c_str()][seriesDescription])) continue;
+		
+
 		// build the dicom image
 		DicomImage image = BuildDicomImage(filenames[i], mapping[filenames[i].c_str()]);
-		
-		
+
+		images.push_back(image);
 	}
 
-	std::vector<DicomImage> images;
 
 	return images;
 }
 
 // ------------------------------------------------------------------------
-DicomImage SeriesExtractor::BuildDicomImage(const std::string &filename, const gdcm::Scanner::TagToValue &mappings)
+bool SeriesExtractor::FilterOnSeriesDescription(const std::string &description)
 {
-	DicomImage image;
-	image.seriesNumber = ConvertInt(mappings.at(seriesNumber));
-	image.imageNumber = ConvertInt(mappings.at(instanceNumber));
-	image.sliceThickness = ConvertDouble(mappings.at(sliceThickness));
+	// if filters are empty then ignore
+	if(m_DescriptionFilters.empty()) return false;	
 
-	
+	for(unsigned int i = 0; i < m_DescriptionFilters.size(); i++)
+	{
+		if(description.find(m_DescriptionFilters[i]) != std::string::npos)
+		{
+			return false;
+		}
+	}
 
-
-	std::cout << image.sliceThickness << std::endl;
-	
-
-
-	return image;
-
+	return true;
 }
 
 
-
-/*
-typedef struct _dicom_image
+// ------------------------------------------------------------------------
+DicomImage SeriesExtractor::BuildDicomImage(const std::string &filename, const gdcm::Scanner::TagToValue &mappings)
 {
-	unsigned int seriesNumber;
-	unsigned int imageNumber;
-	unsigned int sliceThickness;
-	unsigned int rows;
-	unsigned int cols;
-	double triggerTime;
-	double sliceLocation;
-	double slicePosition[3];
-	double sliceOrientation[6];
+	DicomImage image;
+	image.seriesDescription = mappings.at(seriesDescription);
+	image.seriesNumber = ConvertInt(mappings.at(seriesNumber));
+	image.imageNumber = ConvertInt(mappings.at(instanceNumber));
+	image.sliceThickness = ConvertDouble(mappings.at(sliceThickness));
+	image.rows = ConvertInt(mappings.at(rows));
+	image.cols = ConvertInt(mappings.at(cols));
+	image.triggerTime = ConvertDouble(mappings.at(triggerTime));
+	image.sliceLocation = ConvertDouble(mappings.at(sliceLocation));
+	image.imagePosition = ConvertDoubleArray(mappings.at(imagePosition));
+	image.imageOrientation = ConvertDoubleArray(mappings.at(imageOrientation));
+	image.filename = filename;
 
-	std::string filename;
-} DicomImage;
-*/
+	return image;
+}
 
+
+// ------------------------------------------------------------------------
+std::vector<double> SeriesExtractor::ConvertDoubleArray(const std::string &value)
+{
+	QString qvalue = QString::fromStdString(value);
+	QStringList tokens = qvalue.split("\\");
+
+	std::vector<double> output;
+	for(int i = 0; i < tokens.size(); i++)
+	{
+		output.push_back(tokens[i].toDouble());
+	}
+
+	return output;
+}
 
 // ------------------------------------------------------------------------
 double SeriesExtractor::ConvertDouble(const std::string &value)

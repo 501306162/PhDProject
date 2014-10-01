@@ -1,7 +1,13 @@
 set( sources "main.cpp"
-	"SeriesExtractor.cpp"	)
+	"SeriesExtractor.cpp"
+	"MainWindow.cpp" )
+
+set(qt_headers "MainWindow.h")
 
 
-add_executable( DicomSorter ${sources} )
-target_link_libraries( DicomSorter ${ITK_LIBRARIES} )
+qt4_wrap_cpp( headers_moc ${qt_headers} )
+
+
+add_executable( DicomSorter ${sources} ${headers_moc} )
+target_link_libraries( DicomSorter ${ITK_LIBRARIES} ${QT_LIBRARIES} )
 install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/DicomSorter" DESTINATION ${bin_path})

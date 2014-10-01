@@ -1,22 +1,34 @@
-#include <iostream>
+#include <QApplication>
 
-#include <gdcmReader.h>
+#include "MainWindow.h"
 
-
-#include "SeriesExtractor.h"
-
-
-#include "common.h"
-
-int main(int, char ** argv)
+int main(int argc, char ** argv)
 {
+	QApplication app(argc, argv);
+
+
+	MainWindow window;
+	window.show();
+
+	return app.exec();
+
+	/*
+
 	std::string inputFolder = argv[1];
 	std::cout << "Parsing DICOM files in folder: " << inputFolder << std::endl;
 
 
 	SeriesExtractor extractor(inputFolder);
+
+	std::vector<std::string> filters;
+	filters.push_back("cine");
+	filters.push_back("Cine");
+	extractor.SetDescriptionFilters(filters);
 	extractor.ExtractSeries();
 	
+
+	*/
+
 
 
 
