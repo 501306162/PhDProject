@@ -13,6 +13,7 @@ set(APP_NAMES
 	"ThresholdFunction"
 	"CineExtractor"
 	"SortIRESOutput"
+	"ComputeSeriesTransformToOrigin"
 	#"ContourExtraction"
 	)
 

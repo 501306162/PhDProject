@@ -26,6 +26,7 @@ int main(int, char ** argv)
 	// load the registration and lookup file
 	std::string regFilename = argv[1];
 	std::string lookupFilename = argv[2];
+	std::string outputFilename = argv[3];
 
 	// read the files
 	LookupMap lookup;
@@ -37,19 +38,48 @@ int main(int, char ** argv)
 	
 	// save the output
 	LookupMap::iterator mapIt = lookup.begin();
+
+
+	std::ofstream output;
+	output.open(outputFilename.c_str());
+
+	
+
 	while(mapIt != lookup.end())
 	{
-		std::stringstream ss;
-		int series = mapIt->first;
-		
-		
 
+		std::map<int, int>::iterator mapIt2 = mapIt->second.begin();
+		int seriesNumber = mapIt->first;
+
+		while(mapIt2 != mapIt->second.end())
+		{
+			int sliceNumber = mapIt2->first;
+			int seriesId = mapIt2->second;
+			TransformationType trans = transforms[seriesId];
+
+			std::stringstream ss;
+			ss << seriesId << ":" << seriesNumber << ":" << sliceNumber << ":";
+			for(unsigned int i = 0; i < 3; i++)
+			{
+				ss << trans.first[i] << ":";
+			}
+
+			for(unsigned int i = 0; i < 3; i++)
+			{
+				ss << trans.second[i] << ":";
+			}
+
+			std::string outputLine = ss.str();
+			output << outputLine.substr(0,outputLine.size()-1) << std::endl;
+			++mapIt2;
+		}
 
 		++mapIt;
 	}
 
-	std::cout << lookup.size() << std::endl;
 
+	output.close();
+	return 0;
 }
 
 // ------------------------------------------------------------------------

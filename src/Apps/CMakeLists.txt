@@ -4,6 +4,7 @@ set(APPS
 	"Testing"
 	"Testing2"
 	"DataPrep"
+	"SegmentationGenerator"
 	"DicomSorter")
 
 # ----------------------------------------------------------------------
