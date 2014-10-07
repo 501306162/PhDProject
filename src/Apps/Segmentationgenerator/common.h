@@ -14,6 +14,19 @@
 typedef itk::Image<unsigned short, 3> ImageType;
 typedef std::vector<ImageType::Pointer> ImageList;
 
+typedef struct _options_data
+{
+	std::vector<int> volumeSize;
+	std::vector<int> roiOffset;
+	std::vector<int> border;
+
+	_options_data()
+	{
+		volumeSize.resize(3);
+		roiOffset.resize(3);
+	}
+
+} OptionsData;
 
 // define the structure to hold the input information 
 typedef struct _trans

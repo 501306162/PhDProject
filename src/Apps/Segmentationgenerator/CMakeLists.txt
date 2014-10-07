@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 # Gather all the sources
-set( sources "main.cpp" "functions.cpp" )
+set( sources "main.cpp" "functions.cpp" "InitialTransformExtractor.cpp" )
 
 add_executable( SegmentationGenerator ${sources} )
 add_dependencies( SegmentationGenerator Utils Manifold)

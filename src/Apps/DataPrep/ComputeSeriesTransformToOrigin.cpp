@@ -8,7 +8,6 @@
 #include <gdcmAttribute.h>
 #include <gdcmDataSet.h>
 #include <gdcmIPPSorter.h>
-#include <QString>
 
 #include <itkGDCMImageIO.h>
 #include <itkNrrdImageIO.h>
@@ -18,8 +17,38 @@
 #include <itkFlipImageFilter.h>
 #include <itkPermuteAxesImageFilter.h>
 
+
+#include <QString>
+#include <QXmlStreamReader>
+#include <QFile>
+
+
+typedef struct _options_data
+{
+	std::vector<unsigned int> volumeSize;
+	std::vector<unsigned int> roiOffset;
+
+	_options_data()
+	{
+		volumeSize.resize(3);
+		roiOffset.resize(3);
+	}
+
+} OptionsData;
+
+void readXMLValues(const std::string &input, OptionsData &options);
+
+
+
+
+
 int main(int, char ** argv)
 {
+	OptionsData options;
+	readXMLValues(argv[2], options);
+	
+	exit(1);
+
 
 	// parse the dicom directory
 	gdcm::Directory dir;
@@ -168,3 +197,99 @@ int main(int, char ** argv)
 
 	return 0;
 }
+
+
+
+// ------------------------------------------------------------------------
+void readXMLValues(const std::string &input, OptionsData &options)
+{
+
+	// open the xml file
+	QFile * file = new QFile(input.c_str());
+	if(!file->open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		std::cout << "Couldn't open the xml file" << std::endl;
+		exit(1);
+	}
+
+	// read the xml 
+	QXmlStreamReader xml(file);
+
+	while(!xml.atEnd())
+	{
+		QXmlStreamReader::TokenType token = xml.readNext();
+		
+		if(token == QXmlStreamReader::StartDocument) continue;
+		if(token == QXmlStreamReader::StartElement)
+		{
+			if(xml.name() == "volume_size")
+			{
+				xml.readNext();
+
+				// loop until the end element named volume size
+				while(!(xml.tokenType() == QXmlStreamReader::EndElement &&
+							xml.name() == "volume_size"))
+				{
+					// get the x y and z values
+					if(xml.tokenType() == QXmlStreamReader::StartElement && xml.name() == "x")
+					{
+						xml.readNext();
+						options.volumeSize[0] = xml.text().toString().toInt();
+					}
+
+					if(xml.tokenType() == QXmlStreamReader::StartElement && xml.name() == "y")
+					{
+						xml.readNext();
+						options.volumeSize[1] = xml.text().toString().toInt();
+					}
+
+					if(xml.tokenType() == QXmlStreamReader::StartElement && xml.name() == "z")
+					{
+						xml.readNext();
+						options.volumeSize[2] = xml.text().toString().toInt();
+					}
+
+					xml.readNext();
+				}
+
+			}
+
+			if(xml.name() == "ROI_offset")
+			{
+				xml.readNext();
+
+				// loop until the end element named volume size
+				while(!(xml.tokenType() == QXmlStreamReader::EndElement &&
+							xml.name() == "ROI_offset"))
+				{
+					// get the x y and z values
+					if(xml.tokenType() == QXmlStreamReader::StartElement && xml.name() == "x")
+					{
+						xml.readNext();
+						options.roiOffset[0] = xml.text().toString().toInt();
+					}
+
+					if(xml.tokenType() == QXmlStreamReader::StartElement && xml.name() == "y")
+					{
+						xml.readNext();
+						options.roiOffset[1] = xml.text().toString().toInt();
+					}
+
+					if(xml.tokenType() == QXmlStreamReader::StartElement && xml.name() == "z")
+					{
+						xml.readNext();
+						options.roiOffset[2] = xml.text().toString().toInt();
+					}
+
+					xml.readNext();
+				}
+
+			}
+		}
+	
+	}
+}
+
+
+
+

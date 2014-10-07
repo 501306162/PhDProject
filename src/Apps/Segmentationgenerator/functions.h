@@ -10,6 +10,12 @@
 
 
 /**
+ * Function to read the xml values from the iresisd options file
+ */
+void readXMLValues(const std::string &input, OptionsData &options);
+
+
+/**
  * Function to load the input options file
  */
 void readOptionsFile(const std::string &filename, SeriesTransform::Map &transforms);
