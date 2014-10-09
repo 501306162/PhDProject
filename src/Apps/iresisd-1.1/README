@@ -1,0 +1,72 @@
+This is the release version 1.0 of the ISISD and IReSISD code. For information on the methods, please refer to http://www.bris.ac.uk/vi-lab/projects/sparseobjectmodelling/ and to our publications.
+
+
+**************************************************************
+CONDITIONS OF USE
+
+Copyright (c) 2014, Adeline Paiement
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    * The two following publications must be cited in published works
+      that use or incorporate this software:
+	Adeline Paiement, Majid Mirmehdi, Xianghua Xie, Mark Hamilton,
+      Integrated Segmentation and Interpolation of Sparse Data.
+      IEEE-TIP, Vol. 23, Issue 1, pp. 110-125, 2014.
+	Adeline Paiement, Majid Mirmehdi, Xianghua Xie, Mark Hamilton,
+      Registration and Modeling from Spaced and Misaligned Image Volumes.
+      Submitted to IEEE-PAMI - under review.
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of the University of Bristol nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written
+      permission.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Disclaimer: ISISD and IReSISD are NOT for clinical use.
+The ISISD and IReSISD software are intended for educational, research, and informational purposes only. They may be used only for these purposes and may not under any circumstances be used for clinical purposes.
+
+This software is made available with no warranties.
+
+To acknowledge ISISD and IReSISD as a platform, please cite the ISISD and IReSISD web site (http://www.bris.ac.uk/vi-lab/projects/sparseobjectmodelling/) and the following publications when publishing work that uses or incorporates ISISD and IReSISD.
+
+- Adeline Paiement, Majid Mirmehdi, Xianghua Xie, Mark Hamilton, Integrated Segmentation and Interpolation of Sparse Data. IEEE-TIP, Vol. 23, Issue 1, pp. 110-125, 2014.
+
+- Adeline Paiement, Majid Mirmehdi, Xianghua Xie, Mark Hamilton, Registration and Modeling from Spaced and Misaligned Image Volumes. Submitted to IEEE-PAMI - under review.
+
+
+**************************************************************
+INSTALL (tested on Linux CentOS and Ubuntu only)
+
+To compile on linux systems, type "./configure" then "make" in the root folder. This will generate the IReSISD executable in the "[ROOT_DIR]/bin" folder.
+
+* Dependencies
+
+The following librairies are required:
+
+dcmtk (version 3.6.0 tested)
+openCV (version 2.4.0 tested)
+nifti (version 2.0.0 tested)
+FFTW (version 3.3.3 tested)
+openMP
+
+
+**************************************************************
+USAGE
+
+An XML file containing all the parameters of the program has to be provided to the program:
+./IReSISD [xml_file]
+
+Possible parameters are described in "[ROOT]/xml_examples/params_explained.xml", and examples of XML files may be found in the folder "[ROOT]/xml_examples/".

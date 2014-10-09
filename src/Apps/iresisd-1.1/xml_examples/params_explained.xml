@@ -1,0 +1,123 @@
+<?xml version=\"1.0\"?>
+
+<data> 
+	<datatype>dicom_cardiac</datatype>					<!-- possible values: dicom, dicom_cardiac, nifti, nrrd -->
+	<directory>./CD2</directory>
+	<periodic_motion>true</periodic_motion>					<!-- optional - default value = false -->
+	<accurate_volume_filling>false</accurate_volume_filling>		<!-- optional - default value = false - an accurate volume filling produces a nicer display of the nrrd volumes VolumeData.nii and VolumeData_aligned.nii -->
+	<volume_size>								<!-- optional -->
+		<x>150</x>
+		<y>150</y>
+		<z>150</z>
+	</volume_size>
+	<ROI_offset>								<!-- optional - only needed if volume_size provided -->
+		<x>0</x>
+		<y>0</y>
+		<z>0</z>
+	</ROI_offset>
+	<use_first_timeframe_only>false</use_first_timeframe_only>		<!-- optional - default value = false -->
+	<serie_ref_defines_volume_size>true</serie_ref_defines_volume_size>	<!-- optional - default value = false - only needed if volume_size NOT provided -->
+	<ROI_selection>true</ROI_selection>					<!-- optional - default value = false - only needed if volume_size NOT provided -->
+	<registration>								<!-- optional - default value = VECT_NULL for translation and rotation of all images -->
+		<serie description="SA">					<!-- optional - default value = VECT_NULL for translation and rotation -->
+			<slice number="5">					<!-- optional - translation and rotation applied to all slices if not provided -->
+				<translation>					<!-- optional - default value = VECT_NULL -->
+					<x>0</x>				<!-- in pixels -->
+					<y>0</y>
+					<z>0</z>
+				</translation>
+				<rotation>					<!-- optional - default value = VECT_NULL -->
+					<x>0</x>				<!-- in radians -->
+					<y>0</y>
+					<z>0</z>
+				</rotation>
+			</slice>
+		</serie>
+	</registration>
+</data>
+
+<RBF>
+	<beta>3</beta>
+	<psi>
+		<index>1</index>						<!-- optional - used if double or mixed scheme - starts at 1 -->
+		<gamma>0.5</gamma>
+		<dirac_width>1</dirac_width>					<!-- optional - default value = 1 -->
+	</psi>
+	<psi>
+		<index>2</index>
+		<gamma>5</gamma>
+		<dirac_width>3</dirac_width>
+	</psi>
+	<borders>								<!-- optional - default value = [20, 20, 20, 20] -->
+		<x>20</x>							<!-- in pixels -->
+		<y>20</y>
+		<z>20</z>
+		<t>0</t>
+	</borders>
+</RBF>
+
+<level_set>
+	<initialisation>circle</initialisation>					<!-- optional - default value = circle - other possible value: nifti (requires nifti_file as an element of phi, that contains the path/name of the nifti file) -->
+	<phi>
+		<index>1</index>						<!-- optional - used if several phi - starts at 1 -->
+		<circle>
+			<center>
+				<x>150</x>					<!-- in pixels -->
+				<y>150</y>
+				<z>150</z>
+				<t>0</t>
+			</center>
+			<radius>10</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>10</x>					
+				<y>150</y>
+				<z>200</z>
+				<t>0</t>
+			</center>
+			<radius>5</radius>					
+		</circle>
+	</phi>
+</level_set>
+
+<speed_function>
+	<SF_data>
+		<index>1</index>						<!-- used if several SF_data, optional otherwise - starts at 1 -->
+		<name>GVF</name>
+		<param>1</param>						<!-- optional - as may as needed -->
+		<weight>0.5</weight>						<!-- optional - default value = 1 if only one SF_data defined - if provided, will be applied to all sequences. if not defined, the user will be asked interactively to choose one weight value per sequence -->
+	</SF_data>
+	<SF_data>
+		<index>2</index>
+		<name>CV</name>
+		<weight>0.5</weight>
+	</SF_data>
+	<SF_geom>
+		<index>1</index>						<!-- used if several SF_geom, optional otherwise - starts at 1 -->
+		<name>normalisation</name>
+	</SF_geom>
+</speed_function>
+
+<scheme>simple</scheme>								<!-- possible values: simple, double, mixed -->
+
+<registration>									<!-- optional - no registration if not provided -->
+	<global_variant>false</global_variant>					<!-- optional - default value = false -->
+	<selection_of_connected_regions>false</selection_of_connected_regions>	<!-- optional - default value = false - only used if global_variant = true -->
+	<slice_wise>true</slice_wise>						<!-- optional - decided on type of data if not provided -->
+	<shifts_in_SA_planes_at_beginning>true</shifts_in_SA_planes_at_beginning><!-- optional - default value = false -->
+	<wait_before_rotation>100</wait_before_rotation>			<!-- optional - number of iterations - default value = 0 -->
+</registration>
+
+<display>1</display>								<!-- optional - possible values: 0 (no display), 1 (minimal display), 2 (full display) - default value = 0 -->
+
+<stop_condition>
+	<step>
+		<index>1</index>						<!-- optional - used only for double scheme - starts at 1 -->
+		<nb_iterations>100</nb_iterations>				<!-- optional - either nb_iterations or nb_stable_iterations must be defined -->
+	</step>
+	<step>
+		<index>2</index>
+		<nb_stable_iterations>20</nb_stable_iterations>
+	</step>
+</stop_condition>

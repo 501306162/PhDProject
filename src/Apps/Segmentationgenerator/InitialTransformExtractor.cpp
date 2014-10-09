@@ -74,7 +74,7 @@ void InitialTransformExtractor::Compute()
 	flipper->SetInput(refImage);
 	flipper->Update();
 
-	refImage = flipper->GetOutput();
+	//refImage = flipper->GetOutput();
 	
 	// transformation is the negative origin of the reference
 	ImageType::PointType origin = refImage->GetOrigin();

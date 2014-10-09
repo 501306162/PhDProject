@@ -1,0 +1,119 @@
+<?xml version=\"1.0\"?>
+
+<data> 
+	<datatype>dicom_cardiac</datatype>
+	<directory>/home/user-pool/users/haines/Adeline/Datasets/BHI/CD11</directory>
+	<periodic_motion>true</periodic_motion>					<!-- optional - default value = false -->
+	<accurate_volume_filling>false</accurate_volume_filling>		<!-- optional - default value = false -->
+	
+	<use_first_timeframe_only>true</use_first_timeframe_only>		<!-- optional - default value = false -->
+	<volume_size>								<!-- optional -->
+		<x>77</x>
+		<y>77</y>
+		<z>54</z>
+	</volume_size>
+	<ROI_offset>								<!-- optional - only needed if volume_size provided -->
+		<x>62</x>
+		<y>48</y>
+		<z>0</z>
+	</ROI_offset>
+</data>
+
+<RBF>
+	<beta>3</beta>
+	<psi>
+		<index>1</index>						<!-- optional - used if double or mixed scheme - starts at 1 -->
+		<gamma>0.5</gamma>
+		<dirac_width>1</dirac_width>					<!-- optional - default value = 1 -->
+	</psi>
+	<psi>
+		<index>2</index>
+		<gamma>1</gamma>
+		<dirac_width>1</dirac_width>
+	</psi>
+	<psi>
+		<index>3</index>
+		<gamma>1.5</gamma>
+		<dirac_width>1</dirac_width>
+	</psi>
+	<psi>
+		<index>4</index>
+		<gamma>2</gamma>
+		<dirac_width>2</dirac_width>
+	</psi>
+	<psi>
+		<index>5</index>
+		<gamma>2.5</gamma>
+		<dirac_width>2</dirac_width>
+	</psi>
+	<psi>
+		<index>6</index>
+		<gamma>3</gamma>
+		<dirac_width>3</dirac_width>
+	</psi>
+	<psi>
+		<index>7</index>
+		<gamma>3.5</gamma>
+		<dirac_width>3</dirac_width>
+	</psi>
+	<psi>
+		<index>8</index>
+		<gamma>4</gamma>
+		<dirac_width>3</dirac_width>
+	</psi>
+	<psi>
+		<index>9</index>
+		<gamma>4.5</gamma>
+		<dirac_width>3</dirac_width>
+	</psi>
+	<psi>
+		<index>10</index>
+		<gamma>5</gamma>
+		<dirac_width>3</dirac_width>
+	</psi>
+	<borders>								<!-- optional - default value = [20, 20, 20, 20] -->
+		<x>20</x>							<!-- in pixels -->
+		<y>20</y>
+		<z>20</z>
+		<t>0</t>
+	</borders>
+</RBF>
+
+<level_set>
+	<initialisation>circle</initialisation>					<!-- optional - default value = circle - other possible value: nifti (requires nifti_file as an element of phi, that contains the path/name of the nifti file) -->
+	<phi>
+		<circle>
+			<center>
+				<x>38</x>					<!-- in pixels -->
+				<y>45</y>
+				<z>21</z>
+				<t>0</t>
+			</center>
+			<radius>6</radius>					<!-- in pixels -->
+		</circle>
+	</phi>
+</level_set>
+
+<speed_function>
+	<SF_data>
+		<name>CV</name>
+	</SF_data>
+</speed_function>
+
+<scheme>mixed</scheme>								<!-- possible values: simple, double, mixed -->
+
+<registration>									<!-- optional - no registration if not provided -->
+	<global_variant>false</global_variant>					<!-- optional - default value = false -->
+	<selection_of_connected_regions>false</selection_of_connected_regions>	<!-- optional - default value = false - only used if global_variant = true -->
+	<slice_wise>true</slice_wise>						<!-- optional - decided on type of data if not provided -->
+	<shifts_in_SA_planes_at_beginning>true</shifts_in_SA_planes_at_beginning><!-- optional - default value = false -->
+	<wait_before_rotation>100</wait_before_rotation>			<!-- optional - number of iterations - default value = 0 -->
+</registration>
+
+<display>2</display>								
+
+<stop_condition>
+	<step>
+		<nb_stable_iterations>10</nb_stable_iterations>				<!-- optional - either nb_iterations or nb_stable_iterations must be defined -->
+	</step>
+</stop_condition>

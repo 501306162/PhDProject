@@ -1,6 +1,11 @@
 # ----------------------------------------------------------------------
 # Gather all the sources
-set( sources "main.cpp" "functions.cpp" "InitialTransformExtractor.cpp" )
+set( sources "main.cpp" 
+	"functions.cpp" 
+	"InitialTransformExtractor.cpp"
+	"read_series_transforms.cpp"
+	"transforms.cpp"
+	"NormaliseImageFilter.cpp"	)
 
 add_executable( SegmentationGenerator ${sources} )
 add_dependencies( SegmentationGenerator Utils Manifold)

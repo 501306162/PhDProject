@@ -5,6 +5,7 @@ set(APPS
 	"Testing2"
 	"DataPrep"
 	"SegmentationGenerator"
+	"iresisd-1.1"
 	"DicomSorter")
 
 # ----------------------------------------------------------------------

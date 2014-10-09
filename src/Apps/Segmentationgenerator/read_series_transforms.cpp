@@ -1,53 +1,23 @@
-#include <iostream>
-#include <map>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <QString>
-#include <QStringList>
-
-typedef std::map<int, std::map<int, int> > LookupMap;
-typedef std::vector<double> TranslationType;
-typedef std::vector<double> RotationType;
-typedef std::pair<TranslationType, RotationType> TransformationType;
-typedef std::map<int, TransformationType> TransformationMap;
+#include "read_series_transforms.h"
 
 
-void readLookUpFile(const std::string &filename, LookupMap &map);
-void sortRegistrationFile(const std::string &filename, LookupMap &lookup, TransformationMap &transforms);
-void getImageIds(const QString &line, int &series, int &slice);
-void getTranslation(const QString &line, TranslationType &trans);
-void getRotation(const QString &line, RotationType &rot);
-
-
-
-int main(int, char ** argv)
+// ------------------------------------------------------------------------
+void readSeriesTransforms(const std::string &registrationFilename, 
+		const std::string &lookupFilename, 
+		SeriesTransform::Map &transforms)
 {
-	// load the registration and lookup file
-	std::string regFilename = argv[1];
-	std::string lookupFilename = argv[2];
-	std::string outputFilename = argv[3];
 
-	// read the files
 	LookupMap lookup;
 	readLookUpFile(lookupFilename, lookup);
-	
+
 	// load the transformations
-	TransformationMap transforms;
-	sortRegistrationFile(regFilename, lookup, transforms);
+	TransformationMap transTemp;
+	sortRegistrationFile(registrationFilename, lookup, transTemp);
 	
 	// save the output
 	LookupMap::iterator mapIt = lookup.begin();
-
-
-	std::ofstream output;
-	output.open(outputFilename.c_str());
-
-	
-
 	while(mapIt != lookup.end())
 	{
-
 		std::map<int, int>::iterator mapIt2 = mapIt->second.begin();
 		int seriesNumber = mapIt->first;
 
@@ -56,35 +26,25 @@ int main(int, char ** argv)
 			int sliceNumber = mapIt2->first;
 			int seriesId = mapIt2->second;
 
-			if(transforms.count(seriesId) > 0)
+			if(transTemp.count(seriesId) > 0)
 			{
-				TransformationType trans = transforms[seriesId];
+				TransformationType t = transTemp[seriesId];
 
-				std::stringstream ss;
-				ss << seriesId << ":" << seriesNumber << ":" << sliceNumber << ":";
-				for(unsigned int i = 0; i < 3; i++)
-				{
-					ss << trans.first[i] << ":";
-				}
+				SeriesTransform data;
+				data.slice = sliceNumber;
+				data.series = seriesNumber;
+				data.dcmSeries = seriesId;
+				data.translation = t.first;
+				data.rotation = t.second;
 
-				for(unsigned int i = 0; i < 3; i++)
-				{
-					ss << trans.second[i] << ":";
-				}
-
-				std::string outputLine = ss.str();
-				output << outputLine.substr(0,outputLine.size()-1) << std::endl;
+				transforms[seriesId] = data;
 			}
 			++mapIt2;
 		}
-
 		++mapIt;
 	}
-
-
-	output.close();
-	return 0;
 }
+
 
 // ------------------------------------------------------------------------
 void sortRegistrationFile(const std::string &filename, LookupMap &lookup, TransformationMap &transforms)

@@ -1,0 +1,145 @@
+<?xml version=\"1.0\"?>
+
+<data> 
+	<datatype>dicom</datatype>
+	<directory>./Brain/CD1</directory>
+	<periodic_motion>false</periodic_motion>					<!-- optional - default value = false -->
+	<accurate_volume_filling>false</accurate_volume_filling>		<!-- optional - default value = false -->
+	<volume_size>								<!-- only needed if size_volume_known = true -->
+		<x>144</x>
+		<y>96</y>
+		<z>102</z>
+	</volume_size>
+	<ROI_offset>								<!-- only needed if size_volume_known = true -->
+		<x>66</x>
+		<y>84</y>
+		<z>11</z>
+	</ROI_offset>
+</data>
+
+<RBF>
+	<beta>3</beta>
+	<psi>
+		<index>1</index>
+		<gamma>1.5</gamma>
+		<dirac_width>1</dirac_width>
+	</psi>
+	<borders>								<!-- optional - default value = [20, 20, 20, 20] -->
+		<x>20</x>							<!-- in pixels -->
+		<y>20</y>
+		<z>20</z>
+		<t>0</t>
+	</borders>
+</RBF>
+
+<level_set>
+	<initialisation>circle</initialisation>					<!-- optional - default value = circle - other possible value: nifti (requires nifti_file as an element of phi, that contains the path/name of the nifti file) -->
+	<phi>
+		<circle>
+			<center>
+				<x>57</x>					<!-- in pixels -->
+				<y>17</y>
+				<z>22</z>
+				<t>0</t>
+			</center>
+			<radius>2.2</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>48</x>					<!-- in pixels -->
+				<y>74</y>
+				<z>22</z>
+				<t>0</t>
+			</center>
+			<radius>2.2</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>109</x>					<!-- in pixels -->
+				<y>29</y>
+				<z>39</z>
+				<t>0</t>
+			</center>
+			<radius>5.8</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>86</x>					<!-- in pixels -->
+				<y>77</y>
+				<z>39</z>
+				<t>0</t>
+			</center>
+			<radius>2.8</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>46</x>					<!-- in pixels -->
+				<y>44</y>
+				<z>39</z>
+				<t>0</t>
+			</center>
+			<radius>1</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>25</x>					<!-- in pixels -->
+				<y>28</y>
+				<z>44</z>
+				<t>0</t>
+			</center>
+			<radius>3.2</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>21</x>					<!-- in pixels -->
+				<y>49</y>
+				<z>44</z>
+				<t>0</t>
+			</center>
+			<radius>4.5</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>76</x>					<!-- in pixels -->
+				<y>31</y>
+				<z>69</z>
+				<t>0</t>
+			</center>
+			<radius>6.1</radius>					<!-- in pixels -->
+		</circle>
+		<circle>
+			<center>
+				<x>73</x>					<!-- in pixels -->
+				<y>63</y>
+				<z>69</z>
+				<t>0</t>
+			</center>
+			<radius>7.7</radius>					<!-- in pixels -->
+		</circle>
+	</phi>
+</level_set>
+
+<speed_function>
+	<SF_data>
+		<name>CV</name>
+	</SF_data>
+</speed_function>
+
+<registration>									<!-- optional - no registration if not provided -->
+	<global_variant>false</global_variant>					<!-- optional - default value = false -->
+	<selection_of_connected_regions>false</selection_of_connected_regions>	<!-- optional - default value = false - only used if global_variant = true -->
+	<slice_wise>false</slice_wise>						<!-- optional - decided on type of data if not provided -->
+	<shifts_in_SA_planes_at_beginning>false</shifts_in_SA_planes_at_beginning><!-- optional - default value = false -->
+	<wait_before_rotation>100</wait_before_rotation>			<!-- optional - number of iterations - default value = 0 -->
+</registration>
+
+<scheme>simple</scheme>
+
+<display>1</display>								<!-- optional - possible values: 0 (no display), 1 (minimal display), 2 (full display) - default value = 0 -->
+
+<stop_condition>
+	<step>
+		<index>1</index>
+		<nb_stable_iterations>20</nb_stable_iterations>				<!-- optional - either nb_iterations or nb_stable_iterations must be defined -->
+	</step>
+</stop_condition>
