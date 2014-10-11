@@ -42,8 +42,9 @@ int main(int, char ** argv)
 	OptionsData xmlOptions;
 	readXMLValues(xmlFilename, xmlOptions);
 	
-	// TODO update this
-	xmlOptions.instanceNumbers.push_back(0);
+	// get the number of instances by looking at the number of output level sets
+	xmlOptions.instanceNumber = getNumberOfInstances(segmentationDirectory);
+
 
 
 	// set up the series lookup
@@ -59,6 +60,7 @@ int main(int, char ** argv)
 	extractor.SetDicomDir(xmlOptions.dataDirectory);
 	extractor.Compute();
 	ImageType::Pointer reference = extractor.GetReference();
+
 
 	// scan the dicom directory
 	std::cout << " --> Scanning and grouping dicom images" << std::endl;
@@ -83,128 +85,51 @@ int main(int, char ** argv)
 		std::cout << "Loading series: " << count  << std::endl;
 
 		// load the images
-		loadImageSeries(trans, xmlOptions.instanceNumbers);
+		loadImageSeries(trans, xmlOptions.instanceNumber);
 
-
-		// create the output image 
-		ImageType::Pointer output = ImageType::New();
-		output->SetDirection(trans.images[0]->GetDirection());
-		output->SetSpacing(trans.images[0]->GetSpacing());
-		output->SetOrigin(trans.images[0]->GetOrigin());
-		output->SetRegions(trans.images[0]->GetLargestPossibleRegion());
-		output->Allocate();
-		output->FillBuffer(0);
-		
-		
-		typedef itk::ImageRegionIterator<ImageType> ItType;
-		ItType it(output, output->GetLargestPossibleRegion());
-		while(!it.IsAtEnd())
+		for(unsigned int i = 0; i < xmlOptions.instanceNumber; i++)
 		{
-			ImageType::IndexType index = it.GetIndex();
-			ImageType::PointType point;
-			output->TransformIndexToPhysicalPoint(index, point);
-
-			VectorType p1 = point.GetVnlVector();
-			VectorType p2;
-
-			transformPointToPatient(reference, trans, xmlOptions, p1, p2);
-
-			ImageType::PointType point2;
-			point2[0] = p2[0];
-			point2[1] = p2[1];
-			point2[2] = p2[2];
-			
-			if(interpolator->IsInsideBuffer(point2))
-			{
-				float val = interpolator->Evaluate(point2);
-				if(val > 0)
-				{
-					it.Set(1);
-				}
-			}
-
-			++it;
+			ImageType::Pointer label = ImageType::New();
+			createLabelImage(trans, reference, levelSet, xmlOptions.roiOffset, label);
+			trans.labelImages.push_back(label);
 		}
 
-
-		std::stringstream ss;
-		ss << "label_" << trans.description << "_" << trans.dcmSeries << ".nrrd";
-
-		typedef itk::ImageFileWriter<ImageType> WriterType;
-		WriterType::Pointer writer = WriterType::New();
-		writer->SetFileName(ss.str());
-		writer->SetInput(output);
-		writer->SetImageIO(itk::NrrdImageIO::New());
-		writer->Update();
-
-		std::stringstream ss2;
-		ss2 << "image_" << trans.description << "_" << trans.dcmSeries << ".nrrd";
-
-		WriterType::Pointer writer2 = WriterType::New();
-		writer2->SetFileName(ss2.str());
-		writer2->SetInput(trans.images[0]);
-		writer2->SetImageIO(itk::NrrdImageIO::New());
-		writer2->Update();
-
-
-		
-
 		++mapIt; ++count;
-
-		/*
-
-		// normalise the images
-		ImageType::Pointer image = trans.images[0];
-		ImageType::Pointer normalised = ImageType::New();
-		NormaliseImage(image, reference, normalised, trans);
-
-		trans.normalisedImages.push_back(normalised);
-
-		// compute the bounds of the normalised image
-
-		std::cout << trans.description << " " << trans.dcmSeries << " " << normalised->GetOrigin() << std::endl;
-		*/
 	}
-	return 0;
-	
 
 
+	// group the series
+	std::vector<std::vector<SeriesTransform> > groupedTransforms;
+	groupImageSeries(transforms, groupedTransforms);
 
-	// compute the translation using the min maxs and the rio offset
-	std::cout << "Applying Transforms" << std::endl;
-	mapIt = transforms.begin();
-	while(mapIt != transforms.end())
+	for(unsigned int i = 0; i < groupedTransforms.size(); i++)
 	{
-		SeriesTransform trans = mapIt->second;
+		SeriesTransform::List series = groupedTransforms[i];
+		ImageType::Pointer label = ImageType::New();
+		ImageType::Pointer image = ImageType::New();
+
+		buildOutput(series, image, label, 0);
+
 		std::stringstream ss;
-		ss << "output_" << trans.description << "_" << trans.dcmSeries << ".nrrd";
+		ss << "image_" << i << ".nrrd";
+		std::stringstream ss2;
+		ss2 << "label_" << i << ".nrrd";
 
-		ImageType::Pointer test = trans.normalisedImages[0];
-		ImageType::PointType orig = test->GetOrigin();
-		std::cout << orig << std::endl;
-		orig[0] -= xmlOptions.roiOffset[0];
-		orig[1] -= xmlOptions.roiOffset[1];
-		orig[2] -= xmlOptions.roiOffset[2];
-
-
-		std::cout << trans.toString() << std::endl;
-		orig[0] -= (trans.translation[0]);// * (test->GetSpacing()[0] / reference->GetSpacing()[0]));
-		orig[1] -= (trans.translation[1]);// * (test->GetSpacing()[1] / reference->GetSpacing()[1]));
-		orig[2] -= (trans.translation[2]);// * (test->GetSpacing()[2] / reference->GetSpacing()[2]));
-
-
-
-		test->SetOrigin(orig);
-		std::cout << test->GetOrigin() << std::endl;
 		typedef itk::ImageFileWriter<ImageType> WriterType;
 		WriterType::Pointer writer = WriterType::New();
-		writer->SetInput(test);
+		writer->SetInput(label);
+		writer->SetFileName(ss2.str());
 		writer->SetImageIO(itk::NrrdImageIO::New());
-		writer->SetFileName(ss.str());
 		writer->Update();
 
-		++mapIt;
+		writer->SetInput(image);
+		writer->SetFileName(ss.str());
+		writer->Modified();
+		writer->Update();
+
 	}
+
+
 
 
 	return 0;

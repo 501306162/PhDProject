@@ -4,6 +4,8 @@
 #include <QStringList>
 #include <QXmlStreamReader>
 #include <QFile>
+#include <QDir>
+#include <QFileInfo>
 
 #include <gdcmScanner.h>
 #include <gdcmTag.h>
@@ -12,12 +14,125 @@
 #include <itkImage.h>
 #include <itkGDCMImageIO.h>
 #include <itkPermuteAxesImageFilter.h>
+#include <itkImageRegionIterator.h>
 
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_inverse.h>
 
 
+bool sa_series_sort(const SeriesTransform &a, const SeriesTransform &b)
+{
+	return a.slice < b.slice;
+}
 
+
+// ------------------------------------------------------------------------
+int getNumberOfInstances(const std::string &outputDirectory)
+{
+	QDir dir(QString::fromStdString(outputDirectory));
+
+	QStringList filters;
+	filters << "phiContour*";
+	QStringList foundFiles = dir.entryList(filters);
+
+	return foundFiles.size();
+}
+
+// ------------------------------------------------------------------------
+void buildOutput(const SeriesTransform::List &series, ImageType::Pointer &outputImage,
+		ImageType::Pointer &outputLabel, const unsigned int & timestep)
+{
+	// get the output parameters
+	unsigned int slices = series.size();
+	unsigned int timeSteps = series.front().images.size();
+	ImageType::Pointer ref = series.front().images.front();
+
+	if(timestep >= timeSteps)
+	{
+		std::cout << "Not enough time steps in the input" << std::endl;
+		exit(1);
+	}
+
+	ImageType::SpacingType spacing = ref->GetSpacing();
+	spacing[2] = series.front().sliceThickness;
+	ImageType::DirectionType direction = ref->GetDirection();
+	ImageType::PointType origin = ref->GetOrigin();
+	ImageType::RegionType region = ref->GetLargestPossibleRegion();
+	region.SetSize(2,slices);
+
+
+	// create the outputs
+	outputImage->SetSpacing(spacing);
+	outputImage->SetDirection(direction);
+	outputImage->SetOrigin(origin);
+	outputImage->SetRegions(region);
+	outputImage->Allocate();
+	
+
+	outputLabel->SetSpacing(spacing);
+	outputLabel->SetDirection(direction);
+	outputLabel->SetOrigin(origin);
+	outputLabel->SetRegions(region);
+	outputLabel->Allocate();
+
+	itk::ImageRegionIterator<ImageType> outLIt(outputLabel, outputLabel->GetLargestPossibleRegion());
+	itk::ImageRegionIterator<ImageType> outImIt(outputImage, outputImage->GetLargestPossibleRegion());
+
+
+	// loop through the slices
+	for(unsigned int i = 0; i < slices; i++)
+	{
+		ImageType::Pointer im = series[i].images[timestep];
+		ImageType::Pointer label = series[i].labelImages[timestep];
+
+		itk::ImageRegionConstIterator<ImageType> imIt(im, im->GetLargestPossibleRegion());
+		itk::ImageRegionConstIterator<ImageType> lIt(label, label->GetLargestPossibleRegion());
+
+		while(!imIt.IsAtEnd())
+		{
+			outLIt.Set(lIt.Get());
+			outImIt.Set(imIt.Get());
+
+			++imIt; ++lIt;
+			++outLIt; ++outImIt;
+		}
+	}
+}
+
+
+
+// ------------------------------------------------------------------------
+void groupImageSeries(const SeriesTransform::Map &transforms,
+		std::vector<SeriesTransform::List> &grouped)
+{
+	unsigned int saSeriesNumber = getShortAxisSeriesNumber(transforms);
+
+
+	// iterate through the map 
+	SeriesTransform::Map::const_iterator mapIt = transforms.begin();
+	SeriesTransform::List saSeries;
+	while(mapIt != transforms.end())
+	{
+		const SeriesTransform &trans = mapIt->second;
+		unsigned int series = trans.series;
+
+		if(series == saSeriesNumber)
+		{
+			saSeries.push_back(trans);			
+		}
+		else
+		{
+			SeriesTransform::List s;
+			s.push_back(trans);
+			grouped.push_back(s);
+		}
+
+		++mapIt;
+	}	   
+
+	std::sort(saSeries.begin(), saSeries.end(), sa_series_sort);
+	grouped.push_back(saSeries);
+}
 
 // ------------------------------------------------------------------------
 void computeTransform(const ImageType::Pointer &image, vnl_matrix<double> &transform)
@@ -111,9 +226,9 @@ void buildShortAxisVolume(const SeriesTransform::Map &transforms,
 }
 
 // ------------------------------------------------------------------------
-int getShortAxisSeriesNumber(SeriesTransform::Map &transforms)
+int getShortAxisSeriesNumber(const SeriesTransform::Map &transforms)
 {
-	SeriesTransform::Map::iterator mapIt = transforms.begin();
+	SeriesTransform::Map::const_iterator mapIt = transforms.begin();
 	std::map<int, int> seriesSliceMap;
 	while(mapIt != transforms.end())
 	{		
@@ -260,7 +375,7 @@ void groupDicomFiles(const gdcm::Directory::FilenamesType &filenames,
 
 // ------------------------------------------------------------------------
 void loadImageSeries(SeriesTransform &series,
-		const std::vector<int> &instanceNumbers)
+		const unsigned int &instanceNumbers)
 {
 	// resize the image vector
 	series.images.resize(series.imageFilenames.size());
@@ -268,11 +383,11 @@ void loadImageSeries(SeriesTransform &series,
 	typedef itk::GDCMImageIO IOType;
 	typedef itk::ImageFileReader<ImageType> ReaderType;
 
-	for(unsigned int i = 0; i < instanceNumbers.size(); i++)
+	for(unsigned int i = 0; i < instanceNumbers; i++)
 	{
 		ReaderType::Pointer reader = ReaderType::New();
 		reader->SetImageIO(IOType::New());
-		reader->SetFileName(series.imageFilenames[instanceNumbers[i]]);
+		reader->SetFileName(series.imageFilenames[i]);
 		
 		try 
 		{
@@ -284,7 +399,7 @@ void loadImageSeries(SeriesTransform &series,
 			exit(1);
 		}
 
-		series.images[instanceNumbers[i]] = reader->GetOutput();
+		series.images[i] = reader->GetOutput();
 	}
 }
 

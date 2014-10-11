@@ -14,6 +14,13 @@ void NormaliseImage(const ImageType::Pointer &input,
 		const ImageType::Pointer &reference,	
 		ImageType::Pointer &output, SeriesTransform &trans);
 
+int getNumberOfInstances(const std::string &outputDirectory);
+
+
+void buildOutput(const SeriesTransform::List &series, ImageType::Pointer &outputImage,
+		ImageType::Pointer &outputLabel, const unsigned int &timestep);
+
+
 /**
  * Function to find the bounds defined by the set of images
  */
@@ -49,7 +56,7 @@ void buildOutputVolumes(SeriesTransform::Map &transforms);
 /**
  * Function to get the series number for the short axis
  */
-int getShortAxisSeriesNumber(SeriesTransform::Map &transforms);
+int getShortAxisSeriesNumber(const SeriesTransform::Map &transforms);
 
 /**
  * Function to load the input options file
@@ -69,11 +76,15 @@ void groupDicomFiles(const gdcm::Directory::FilenamesType &filenames,
 	   	SeriesTransform::Map &transforms);
 
 
+void groupImageSeries(const SeriesTransform::Map &transforms,
+		std::vector<SeriesTransform::List> &grouped);
+
+
 /**
  * Load the set of images for each of tge registration outputs
  */
 void loadImageSeries(SeriesTransform &series,
-		const std::vector<int> &instanceNumbers);
+		const unsigned int &instanceNumbers);
 
 /**
  * Function to apply the transform to the images

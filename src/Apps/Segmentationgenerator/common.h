@@ -39,7 +39,7 @@ typedef struct _options_data
 	std::vector<int> roiOffset;
 	std::vector<int> border;
 	std::string dataDirectory;
-	std::vector<int> instanceNumbers;
+	unsigned int instanceNumber;
 
 	_options_data()
 	{
@@ -65,6 +65,7 @@ typedef struct _trans
 	std::vector<std::string> imageFilenames;
 	std::vector<ImageType::Pointer> images;
 	std::vector<ImageType::Pointer> normalisedImages;
+	std::vector<ImageType::Pointer> labelImages;
 
 	typedef std::vector<_trans> List;
 	typedef std::map<int, _trans> Map;
