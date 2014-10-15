@@ -14,8 +14,12 @@ set(APP_NAMES
 	"CineExtractor"
 	"SortIRESOutput"
 	"ComputeSeriesTransformToOrigin"
+	"DicomRewriter"
 	#"ContourExtraction"
 	)
+
+
+message(${ITK_LIBRARIES})
 
 include_directories(${ITK_INCLUDE_DIRS})
 

@@ -68,7 +68,7 @@ set( iresisd_SRCS
 # ----------------------------------------------------------------------
 # Build the executable
 add_executable( iresisd ${iresisd_SRCS} )
-target_link_libraries( iresisd fftw3 fftw3_threads  ${OpenCV_LIBRARIES} ${DCMTK_LIBRARIES} niftiio teem )
+target_link_libraries( iresisd fftw3 fftw3_threads  ${OpenCV_LIBRARIES} ${ITK_LIBRARIES} bz2 niftiio teem )
 
 install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/iresisd" DESTINATION bin)
 

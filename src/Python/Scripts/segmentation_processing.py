@@ -5,6 +5,36 @@ import os
 import os.path
 from xml_template_builder import *
 from seginit import *
+from iresisd_seg import *
+from iresisd_cleanup import *
+
+
+def main():
+    args = parse_args()
+    input_data = read_json(args.json_file)
+
+    #iterate through the set of data sets we are working with
+    for data_item in extract_data(input_data, args.data_set):
+
+        # get some variables
+        data_path = os.path.join(input_data["dicom_base_path"], data_item["name"])
+
+        # initialisation mode
+        if args.mode == 0:
+            run_initialisation(input_data, data_item)
+            
+        elif args.mode == 1:
+            run_iresisd(input_data, data_item)
+
+        elif args.mode == 2:
+            iresisd_cleanup(input_data, data_item)
+
+
+            
+
+
+
+
 
 
 # decoding functions
@@ -69,38 +99,6 @@ def extract_data(json_data, data_set):
         return data
 
 
-
-
-
-def main():
-    args = parse_args()
-    input_data = read_json(args.json_file)
-
-    #iterate through the set of data sets we are working with
-    for data_item in extract_data(input_data, args.data_set):
-
-        # get some variables
-        data_path = os.path.join(input_data["dicom_base_path"], data_item["name"])
-
-        # initialisation mode
-        if args.mode == 0:
-
-            xml_output = os.path.join(input_data["initialisation_dump"],"simple_example.xml")
-
-            builder = XmlTemplateBuilder(input_data["xml_template"])
-            builder.iterations(1)
-            builder.dicom_dir(data_path)
-            builder.filename(xml_output)
-            builder.generate()
-
-
-            seg_initialiser = SegInit()
-            seg_initialiser.simple_xml(xml_output)
-            seg_initialiser.iresisd_exe(input_data["iresisd_path"])
-            seg_initialiser.mitk_exe(input_data["mitk_path"])
-            seg_initialiser.cwd(input_data["initialisation_dump"])
-            seg_initialiser.run()
-            
 
     
 

@@ -1,0 +1,64 @@
+{
+	"iresisd_path" : "/Users/oliverferoze/Uni/Projects/PhDProject/build/bin/iresisd",
+	"mitk_path" : "/Applications/MitkWorkbench.app/Contents/MacOS/MitkWorkbench",
+	"iresisd_sorter_path" : "/Users/oliverferoze/Uni/Projects/PhDProject/build/bin/PhDProject/SegmentationGenerator",
+
+	"initialisation_dump" : "/Users/oliverferoze/Uni/Data/Dump",
+	"dicom_base_path" : "/Users/oliverferoze/Uni/Data/Dicom/CineOnly",
+	"iresisd_output_base_path" : "/Users/oliverferoze/Uni/Data/IresisdOutput",
+	"sorted_iresisd_base_path" : "/Users/oliverferoze/Uni/Data/SortedIresisdOutput",
+	"xml_template" : "/Users/oliverferoze/Uni/Data/SegmentationOutput/xml_template.xml",
+
+	"instances" : [ 
+	{
+		"number" : 1,
+		"name" : "p1",
+		"parts" : [
+		{
+			"name" : "lv",
+			"initialised" : true,
+			"initial_seg" : true,
+			"amended" : false,
+			"interpolated" : false,
+			"approved" : false,
+			"circle" : { "r" : 7, "c" : [95,113,137]	},
+			"iterations" : 200
+		}, 
+		{
+			"name" : "rv",
+			"initialised" : true,
+			"initial_seg" : true,
+			"amended" : false,
+			"interpolated" : false,
+			"circle" : { "r" : 5, "c" : [94, 77, 143]	},
+			"iterations" : 200
+		}
+		]
+	},
+	{
+		"number" : 2,
+		"name" : "p2",
+		"parts" : [
+		{
+			"name" : "lv",
+			"initialised" : true,
+			"initial_seg" : true,
+			"amended" : false,
+			"interpolated" : false,
+			"approved" : false,
+			"circle" : { "r" : 7, "c" : [71,67,126]	},
+			"iterations" : 200
+		}, 
+		{
+			"name" : "rv",
+			"initialised" : true,
+			"initial_seg" : true,
+			"amended" : false,
+			"interpolated" : false,
+			"circle" : { "r" : 5, "c" : [56, 47, 126]	},
+			"iterations" : 200
+		}
+		]
+	}
+	]
+}

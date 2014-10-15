@@ -25,6 +25,7 @@ int main(int, char ** argv)
 	std::string registrationFilename = segmentationDirectory + "/registration.txt";
 	std::string seriesLookupFilename = segmentationDirectory + "/series_lookup.txt";
 	std::string levelSetFilename = segmentationDirectory + "/phiContour0_t=0_final.nii";
+	std::string outputDirectory = argv[2];
 
 
 	// load the level set
@@ -102,33 +103,55 @@ int main(int, char ** argv)
 	std::vector<std::vector<SeriesTransform> > groupedTransforms;
 	groupImageSeries(transforms, groupedTransforms);
 
+	// create the lookup file
+	std::string lookupFilename = outputDirectory + "/lookup.txt";
+	std::ofstream lookupFile;
+	lookupFile.open(lookupFilename.c_str());
+
+	if(!lookupFile.is_open())
+	{
+		std::cout << "Couldn't open the output file" << std::endl;
+		exit(1);
+	}
+
 	for(unsigned int i = 0; i < groupedTransforms.size(); i++)
 	{
+		unsigned int timestep = 0;
 		SeriesTransform::List series = groupedTransforms[i];
 		ImageType::Pointer label = ImageType::New();
 		ImageType::Pointer image = ImageType::New();
 
-		buildOutput(series, image, label, 0);
+		buildOutput(series, image, label, timestep);
 
-		std::stringstream ss;
-		ss << "image_" << i << ".nrrd";
-		std::stringstream ss2;
-		ss2 << "label_" << i << ".nrrd";
+	
+
+		std::stringstream ss, ss2;
+		ss << outputDirectory << "/label_" << series.front().description << "_" << series.front().dcmSeries << "_t" << timestep << ".nrrd"; 
+		ss2 << outputDirectory << "/image_" << series.front().description << "_" << series.front().dcmSeries << "_t" << timestep << ".nrrd"; 
+
+
+		for(unsigned int j = 0; j < series.size(); j++)
+		{
+			lookupFile << "label_" << series.front().description << "_" << series.front().dcmSeries << "_t" << timestep << ".nrrd" << ":" << j << ":" << series[j].imageFilenames[timestep] << "\n";			
+		}
+
+
 
 		typedef itk::ImageFileWriter<ImageType> WriterType;
 		WriterType::Pointer writer = WriterType::New();
 		writer->SetInput(label);
-		writer->SetFileName(ss2.str());
+		writer->SetFileName(ss.str());
 		writer->SetImageIO(itk::NrrdImageIO::New());
 		writer->Update();
 
 		writer->SetInput(image);
-		writer->SetFileName(ss.str());
+		writer->SetFileName(ss2.str());
 		writer->Modified();
 		writer->Update();
 
 	}
 
+	lookupFile.close();
 
 
 
