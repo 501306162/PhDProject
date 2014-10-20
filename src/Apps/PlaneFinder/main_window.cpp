@@ -11,6 +11,7 @@ MainWindow::MainWindow(ImageDataList &imageData)
 	setCentralWidget(createLayout());
 	setUpSignals();
 
+
 }
 
 
@@ -19,23 +20,43 @@ void MainWindow::setUpSignals()
 {
 	connect(this->imageList->getImageList(), SIGNAL(itemSelectionChanged()),
 		this, SLOT(imageSelectionChanged()));
-
+	connect(this->zSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSelectionChanged()));
+	connect(this->tSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSelectionChanged()));
 }
 
 // ------------------------------------------------------------------------
 void MainWindow::imageSelectionChanged()
 {
-	imageViewer->setViewedImage( imageList->selectedIndex());
-
+	imageViewer->setViewedImage(imageList->selectedIndex());
+	updateSliders();
+	imageViewer->setViewedTimeStep(tSlider->value());
+	imageViewer->setViewedSlice(zSlider->value());
+	imageViewer->updateImage();
 
 }
 
 // ------------------------------------------------------------------------
-void MainWindow::setTimeStep(unsigned int currentSelection)
+void MainWindow::updateSliders()
 {
+	unsigned int maxSlice = imageViewer->maxSlice();
+	unsigned int maxTimeStep = imageViewer->maxTimeStep();
+	unsigned int currentSlice = zSlider->value();
+	unsigned int currentTimeStep = tSlider->value();
+
+	if(currentSlice > maxSlice)
+		currentSlice = maxSlice;
+	if(currentTimeStep > maxTimeStep)
+		currentTimeStep = maxTimeStep;
+
+	tSlider->setMaximum(maxTimeStep);
+	tSlider->setValue(currentTimeStep);
+	zSlider->setMaximum(maxSlice);
+	zSlider->setValue(currentSlice);
+
 
 }
-
 
 
 // ------------------------------------------------------------------------
@@ -92,11 +113,17 @@ QWidget * MainWindow::createLayout()
 QWidget * MainWindow::createButtonGroup()
 {
 	QGroupBox * buttonBox = new QGroupBox;
+	addLineButton = new QPushButton("Add Line");
+	removeLineButton = new QPushButton("Remove Line");
+	propagateLineButton = new QPushButton("Propagate Line");
 	mvButton = new QPushButton("Mitral Valve");
 	tpButton = new QPushButton("Tricuspid Valve");
 	avButton = new QPushButton("Auortic Valve");
 
 	QVBoxLayout * layout = new QVBoxLayout;
+	layout->addWidget(addLineButton);
+	layout->addWidget(removeLineButton);
+	layout->addWidget(propagateLineButton);
 	layout->addWidget(mvButton);
 	layout->addWidget(tpButton);
 	layout->addWidget(avButton);
@@ -138,6 +165,7 @@ QWidget * MainWindow::createImageViewer()
 {
 	imageViewer = new ImageViewer(this->images);
 	imageViewer->getWidget()->setMinimumSize(QSize(500,500));
+	imageSelectionChanged();
 	return imageViewer->getWidget();
 }
 

@@ -4,6 +4,7 @@ set( SRCS
 	"data_loader.cpp"
 	"image_list.cpp"
 	"image_viewer.cpp"
+	"point_picker.cpp"
 	)
 
 set(qt_headers "main_window.h")

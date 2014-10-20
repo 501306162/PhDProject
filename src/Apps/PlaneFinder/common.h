@@ -9,12 +9,13 @@
 
 
 typedef vtkSmartPointer<vtkImageData> ImagePointer;
-typedef std::vector<ImagePointer> ImageList;
+typedef std::vector<ImagePointer> ImageVolume;
+typedef std::vector<ImageVolume> ImageSequence;
 
 
 typedef struct image_data_
 {
-	ImageList images;
+	ImageSequence images;
 	std::string filename;
 } ImageData;
 

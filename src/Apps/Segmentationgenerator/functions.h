@@ -18,7 +18,7 @@ int getNumberOfInstances(const std::string &outputDirectory);
 
 
 void buildOutput(const SeriesTransform::List &series, ImageType::Pointer &outputImage,
-		ImageType::Pointer &outputLabel, const unsigned int &timestep);
+		ImageType::Pointer &outputLabel, const unsigned int & timestep);
 
 
 /**

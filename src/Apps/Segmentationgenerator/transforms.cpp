@@ -11,10 +11,11 @@ void createLabelImage(const SeriesTransform &series,
 	   const ImageType::Pointer &reference,
 	   const LevelSetType::Pointer &levelSet,
 	   const std::vector<int> &roiOffset,
-	   ImageType::Pointer &label)
+	   ImageType::Pointer &label,
+	   unsigned int instance)
 {
 	// initialise the label image
-	createOutput(series.images[0], label);
+	createOutput(series.images[instance], label);
 
 
 	// create the level set interpolator

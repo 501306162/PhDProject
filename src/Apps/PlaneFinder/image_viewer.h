@@ -11,7 +11,9 @@
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
 #include <vtkRenderer.h>
-#include <vtkInteractorStyleImage.h>
+
+#include "point_picker.h"
+
 
 class ImageViewer 
 {
@@ -19,14 +21,26 @@ public:
 
 	typedef struct viewer_data_
 	{
-		std::vector<vtkSmartPointer< vtkImageSlice > > imageSlices;
-		std::vector<vtkSmartPointer< vtkImageSliceMapper > > imageMappers;
+		typedef std::vector<vtkSmartPointer<vtkImageSlice> > ImageVolumeActors;
+		typedef std::vector<ImageVolumeActors> ImageSequenceActors;
+		ImageSequenceActors actors;
+
+		typedef std::vector<vtkSmartPointer<vtkImageSliceMapper> > ImageVolumeMappers;
+		typedef std::vector<ImageVolumeMappers> ImageSequenceMappers;
+		ImageSequenceMappers mappers;
+
 	} ViewerData;
 
 	ImageViewer(ImageDataList &imageData);
 
 
 	void setViewedImage(unsigned int index);
+	void setViewedTimeStep(unsigned int timestep);
+	void setViewedSlice(unsigned int slice);
+	void updateImage();
+	unsigned int maxIndex();
+	unsigned int maxTimeStep();
+	unsigned int maxSlice();
 
 	QVTKWidget * getWidget() { return widget; }
 
@@ -38,7 +52,11 @@ private:
 	std::vector<ViewerData> viewerData;
 	QVTKWidget * widget;
 	vtkSmartPointer<vtkRenderer> renderer;
-	vtkSmartPointer<vtkInteractorStyleImage> style;
+	vtkSmartPointer<PointPicker> style;
+
+	unsigned int currentIndex;
+	unsigned int currentSlice;
+	unsigned int currentTimeStep;
 };
 
 #endif

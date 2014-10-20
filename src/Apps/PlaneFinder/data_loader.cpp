@@ -9,7 +9,7 @@
 #include <itkImageFileReader.h>
 #include <itkFlipImageFilter.h>
 #include <itkExtractImageFilter.h>
-
+#include <itkRegionOfInterestImageFilter.h>
 
 
 // ------------------------------------------------------------------------
@@ -76,6 +76,7 @@ void DataLoader::LoadImage(const std::string &filename, ImageData &image)
 	axes[0] = false;
 	axes[1] = true;
 	axes[2] = false;
+	axes[3] = false;
 
 	flipper->SetFlipAxes(axes);
 	flipper->SetInput(reader->GetOutput());
@@ -84,6 +85,7 @@ void DataLoader::LoadImage(const std::string &filename, ImageData &image)
 	ImageType::Pointer reference = flipper->GetOutput();
 	ImageType::RegionType refRegion = reference->GetLargestPossibleRegion();
 	const unsigned int timeSteps = refRegion.GetSize()[3];
+	const unsigned int slices = refRegion.GetSize()[2];
 
 	for(unsigned int i = 0; i < timeSteps; i++)
 	{
@@ -105,20 +107,43 @@ void DataLoader::LoadImage(const std::string &filename, ImageData &image)
 		extractor->SetInput(reference);
 		extractor->SetExtractionRegion(exRegion);
 		extractor->SetDirectionCollapseToSubmatrix();
+		extractor->Update();
 		
-		
-		// convert
-		VTKFilterType::Pointer vtkFilter = VTKFilterType::New();
-		vtkFilter->SetInput(extractor->GetOutput());
-		vtkFilter->Update();
+		ImageVolume imageVolume;
 
 
-		vtkSmartPointer<vtkImageData> vtkImage = 
-			vtkSmartPointer<vtkImageData>::New();
-		vtkImage->DeepCopy(vtkFilter->GetOutput());
+
+		for(unsigned int j = 0; j < slices; j++)
+		{
+			typedef itk::RegionOfInterestImageFilter<TimeStepType, TimeStepType> ROIFilter;
+			ROIFilter::Pointer roiFilter = ROIFilter::New();
+			roiFilter->SetInput(extractor->GetOutput());
+
+			TimeStepType::RegionType roiRegion = extractor->GetOutput()->GetLargestPossibleRegion();
+			TimeStepType::SizeType roiSize = roiRegion.GetSize();
+			TimeStepType::IndexType roiIndex = roiRegion.GetIndex();
+			roiSize[2] = 1;
+			roiIndex[2] = j;
+			roiRegion.SetSize(roiSize);
+			roiRegion.SetIndex(roiIndex);
+
+			roiFilter->SetRegionOfInterest(roiRegion);
 
 
-		image.images.push_back(vtkImage);
+			VTKFilterType::Pointer vtkFilter = VTKFilterType::New();
+			vtkFilter->SetInput(roiFilter->GetOutput());
+			vtkFilter->Update();
+
+			vtkSmartPointer<vtkImageData> vtkImage = 
+				vtkSmartPointer<vtkImageData>::New();
+			vtkImage->DeepCopy(vtkFilter->GetOutput());
+
+
+			imageVolume.push_back(vtkImage);
+			
+		}
+
+		image.images.push_back(imageVolume);
 	}
 }
 

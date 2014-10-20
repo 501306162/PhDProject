@@ -24,11 +24,14 @@ protected:
 protected slots:
 	void imageSelectionChanged();
 
+
 private:
 	ImageDataList images;
 
+
 	void createActions();
 	void setUpSignals();
+	void updateSliders();
 	QWidget * createLayout();
 	QWidget * createImageList();
 	QWidget * createButtonGroup();
@@ -44,6 +47,10 @@ private:
 	QPushButton * mvButton;
 	QPushButton * tpButton;
 	QPushButton * avButton;
+
+	QPushButton * addLineButton;
+	QPushButton * removeLineButton;
+	QPushButton * propagateLineButton;
 
 	// sliders 
 	QSlider * tSlider;

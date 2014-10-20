@@ -18,7 +18,8 @@ void createLabelImage(const SeriesTransform &series,
 	   const ImageType::Pointer &reference,
 	   const LevelSetType::Pointer &levelSet,
 	   const std::vector<int> &roiOffset,
-	   ImageType::Pointer &label);
+	   ImageType::Pointer &label,
+	   unsigned int instance);
 		
 /**
  * Function to build the output from the input

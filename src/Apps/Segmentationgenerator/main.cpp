@@ -15,6 +15,7 @@
 #include <itkImageFileWriter.h>
 #include <itkNrrdImageIO.h>
 #include <itkNiftiImageIO.h>
+#include <itkJoinSeriesImageFilter.h>
 
 
 int main(int, char ** argv)
@@ -24,18 +25,9 @@ int main(int, char ** argv)
 	std::string xmlFilename = segmentationDirectory + "/simple_example.xml";
 	std::string registrationFilename = segmentationDirectory + "/registration.txt";
 	std::string seriesLookupFilename = segmentationDirectory + "/series_lookup.txt";
-	std::string levelSetFilename = segmentationDirectory + "/phiContour0_t=0_final.nii";
 	std::string outputDirectory = argv[2];
 
 
-	// load the level set
-	typedef itk::ImageFileReader<LevelSetType> ReaderType;
-	ReaderType::Pointer reader = ReaderType::New();
-	reader->SetFileName(levelSetFilename);
-	reader->SetImageIO(itk::NiftiImageIO::New());
-	reader->Update();
-
-	LevelSetType::Pointer levelSet = reader->GetOutput();
 
 
 	// read the xml file
@@ -74,11 +66,6 @@ int main(int, char ** argv)
 	SeriesTransform::Map::iterator mapIt = transforms.begin();
 	unsigned int count = 1;
 
-	// st up the interpolator
-	typedef itk::LinearInterpolateImageFunction<LevelSetType, double> InterpolatorType;
-	InterpolatorType::Pointer interpolator = InterpolatorType::New();
-	interpolator->SetInputImage(levelSet);
-
 
 	while(mapIt != transforms.end())
 	{
@@ -90,8 +77,28 @@ int main(int, char ** argv)
 
 		for(unsigned int i = 0; i < xmlOptions.instanceNumber; i++)
 		{
+			std::stringstream ssLevelSet;
+			ssLevelSet << segmentationDirectory << "/phiContour0_t=" << i << "_final.nii";
+			std::string levelSetFilename = ssLevelSet.str();
+
+			// load the level set for this instance
+			typedef itk::ImageFileReader<LevelSetType> ReaderType;
+			ReaderType::Pointer reader = ReaderType::New();
+			reader->SetFileName(levelSetFilename);
+			reader->SetImageIO(itk::NiftiImageIO::New());
+			reader->Update();
+
+			LevelSetType::Pointer levelSet = reader->GetOutput();
+
+			// st up the interpolator
+			typedef itk::LinearInterpolateImageFunction<LevelSetType, double> InterpolatorType;
+			InterpolatorType::Pointer interpolator = InterpolatorType::New();
+			interpolator->SetInputImage(levelSet);
+
+
+
 			ImageType::Pointer label = ImageType::New();
-			createLabelImage(trans, reference, levelSet, xmlOptions.roiOffset, label);
+			createLabelImage(trans, reference, levelSet, xmlOptions.roiOffset, label, i);
 			trans.labelImages.push_back(label);
 		}
 
@@ -114,37 +121,57 @@ int main(int, char ** argv)
 		exit(1);
 	}
 
+
+
+
+
 	for(unsigned int i = 0; i < groupedTransforms.size(); i++)
 	{
-		unsigned int timestep = 0;
+
+		// create the 4d output image
+		typedef itk::Image<unsigned short, 4> OutputImageType;
+		typedef itk::JoinSeriesImageFilter<ImageType, OutputImageType> JoinerType;
+		JoinerType::Pointer imageJoiner = JoinerType::New();
+		JoinerType::Pointer labelJoiner = JoinerType::New();
+
 		SeriesTransform::List series = groupedTransforms[i];
-		ImageType::Pointer label = ImageType::New();
-		ImageType::Pointer image = ImageType::New();
 
-		buildOutput(series, image, label, timestep);
-
-	
-
-		std::stringstream ss, ss2;
-		ss << outputDirectory << "/label_" << series.front().description << "_" << series.front().dcmSeries << "_t" << timestep << ".nrrd"; 
-		ss2 << outputDirectory << "/image_" << series.front().description << "_" << series.front().dcmSeries << "_t" << timestep << ".nrrd"; 
-
-
-		for(unsigned int j = 0; j < series.size(); j++)
+		for(unsigned int time = 0; time < xmlOptions.instanceNumber; time++)
 		{
-			lookupFile << "label_" << series.front().description << "_" << series.front().dcmSeries << "_t" << timestep << ".nrrd" << ":" << j << ":" << series[j].imageFilenames[timestep] << "\n";			
+			ImageType::Pointer label = ImageType::New();
+			ImageType::Pointer image = ImageType::New();
+
+			buildOutput(series, image, label, time);
+
+
+			imageJoiner->SetInput(time, image);
+			labelJoiner->SetInput(time, label);
 		}
 
 
 
-		typedef itk::ImageFileWriter<ImageType> WriterType;
+		std::stringstream ss, ss2;
+		ss << outputDirectory << "/label_" << series.front().description << "_" << series.front().dcmSeries << ".nrrd"; 
+		ss2 << outputDirectory << "/image_" << series.front().description << "_" << series.front().dcmSeries << ".nrrd"; 
+
+
+		for(unsigned int j = 0; j < series.size(); j++)
+		{
+			lookupFile << "label_" << series.front().description << "_" << series.front().dcmSeries <<  ".nrrd" << ":" << j << ":" << series[j].imageFilenames[0] << "\n";			
+		}
+
+		labelJoiner->Update();
+		imageJoiner->Update();
+
+
+		typedef itk::ImageFileWriter<OutputImageType> WriterType;
 		WriterType::Pointer writer = WriterType::New();
-		writer->SetInput(label);
+		writer->SetInput(labelJoiner->GetOutput());
 		writer->SetFileName(ss.str());
 		writer->SetImageIO(itk::NrrdImageIO::New());
 		writer->Update();
 
-		writer->SetInput(image);
+		writer->SetInput(imageJoiner->GetOutput());
 		writer->SetFileName(ss2.str());
 		writer->Modified();
 		writer->Update();

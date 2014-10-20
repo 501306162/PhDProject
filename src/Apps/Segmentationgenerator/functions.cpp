@@ -47,12 +47,10 @@ void buildOutput(const SeriesTransform::List &series, ImageType::Pointer &output
 	unsigned int timeSteps = series.front().images.size();
 	ImageType::Pointer ref = series.front().images.front();
 
-	if(timestep >= timeSteps)
-	{
-		std::cout << "Not enough time steps in the input" << std::endl;
-		exit(1);
-	}
 
+
+
+	
 	ImageType::SpacingType spacing = ref->GetSpacing();
 	spacing[2] = series.front().sliceThickness;
 	ImageType::DirectionType direction = ref->GetDirection();
@@ -77,6 +75,7 @@ void buildOutput(const SeriesTransform::List &series, ImageType::Pointer &output
 
 	itk::ImageRegionIterator<ImageType> outLIt(outputLabel, outputLabel->GetLargestPossibleRegion());
 	itk::ImageRegionIterator<ImageType> outImIt(outputImage, outputImage->GetLargestPossibleRegion());
+
 
 
 	// loop through the slices
