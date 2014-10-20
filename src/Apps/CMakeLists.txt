@@ -5,6 +5,7 @@ set(APPS
 	"Testing2"
 	"DataPrep"
 	"SegmentationGenerator"
+	"PlaneFinder"
 	"iresisd-1.1"
 	"DicomSorter")
 

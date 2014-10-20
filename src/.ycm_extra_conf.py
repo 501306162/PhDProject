@@ -76,6 +76,8 @@ flags = [
 '-isystem',
 '/Library/Frameworks/QtCore.framework/Headers',
 '-isystem',
+'/Library/Frameworks/QtGui.framework/Headers',
+'-isystem',
 '/usr/include/qt4/QtGui',
 '-isystem',
 '/usr/include/c++/4.2.1',

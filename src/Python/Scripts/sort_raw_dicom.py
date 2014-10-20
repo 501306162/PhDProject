@@ -12,9 +12,35 @@ def main():
             for x in os.listdir(doc_root) 
             if os.path.isdir(os.path.join(doc_root,x))]
 
+
     for d_dir in dirs:
-        dicom_files = get_dicom_files(doc_root)
-        print d_dir, dicom_files[0].StudyInstanceUID
+        dicom_files = get_dicom_files(d_dir)
+        descriptions = get_series_descriptions(dicom_files)
+        study_ids = get_study_ids(dicom_files)
+
+        print study_ids, descriptions
+        
+        
+
+
+
+""" get the list of study ids and the list of series descriptions """
+def get_series_descriptions(dicom_files):
+    descriptions = []
+    for dcm in dicom_files:
+        if not dcm.SeriesDescription in descriptions:
+            descriptions.append(dcm.SeriesDescription)
+
+    return descriptions
+
+def get_study_ids(dicom_files):
+    ids = []
+    for dcm in dicom_files:
+        if not dcm.StudyInstanceUID in ids:
+            ids.append(dcm.StudyInstanceUID)
+
+    return ids
+
 
 
 """ recursive function to get all the dicom files """
