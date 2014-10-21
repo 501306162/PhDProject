@@ -34,7 +34,7 @@ public:
 	/**
 	 * Load the data from the folder
 	 */
-	bool LoadData(ImageDataList &imageData);
+	bool LoadData(DataList &imageData);
 
 	/**
 	 * Add a filter term to the filename search
@@ -47,7 +47,7 @@ protected:
 	 */
 	void GetFilenames(FilenamesType &filenames);
 
-	void LoadImage(const std::string &fname, ImageData &image);
+	void LoadImage(const std::string &fname, DataInstance &image);
 
 	std::string GetFileBasename(const std::string &filename);
 

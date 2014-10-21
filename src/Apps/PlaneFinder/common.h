@@ -6,20 +6,49 @@
 
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
+#include <itkImage.h>
+
+#include "line.h"
+#include <vtkPolyData.h>
+#include <vtkImageSlice.h>
+#include <vtkImageSliceMapper.h>
+
 
 
 typedef vtkSmartPointer<vtkImageData> ImagePointer;
-typedef std::vector<ImagePointer> ImageVolume;
-typedef std::vector<ImageVolume> ImageSequence;
+typedef std::vector<Line::List> LinesPerVolume;
+typedef std::vector<LinesPerVolume> LinesPerSequence;
+
+typedef itk::Image<unsigned short, 3> ImageType;
 
 
-typedef struct image_data_
+
+typedef struct data_holder_
 {
-	ImageSequence images;
-	std::string filename;
-} ImageData;
+	ImagePointer vtkImage;
+	ImageType::Pointer itkImage;
+	vtkSmartPointer<vtkImageSlice> actor;
+	vtkSmartPointer<vtkImageSliceMapper> mapper;
+	
+	unsigned int slice;
+	unsigned int timestep;
+	Line::List lines;
 
-typedef std::vector<ImageData> ImageDataList;
+} DataHolder;
+
+typedef std::vector<DataHolder> VolumeData;
+typedef std::vector<VolumeData> SequenceData;
+
+typedef struct data_instance_
+{
+	std::string filename;
+	SequenceData images;
+} DataInstance;
+
+typedef std::vector<DataInstance> DataList;
+
+
+
 
 
 #endif

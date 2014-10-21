@@ -3,20 +3,14 @@
 #include <QListWidgetItem>
 
 // ------------------------------------------------------------------------
-ImageListDisplay::ImageListDisplay(ImageDataList &imageData)
-{
-	this->images = imageData;
-}
-
-// ------------------------------------------------------------------------
-void ImageListDisplay::setUp()
+ImageListDisplay::ImageListDisplay(DataContainer *imageData)
 {
 	imageList = new QListWidget;
-	for(unsigned int i = 0; i < this->images.size(); i++)
+	for(unsigned int i = 0; i < imageData->numImages(); i++)
 	{
-		std::cout << this->images[i].filename << std::endl;
+		std::cout << imageData->filename(i) << std::endl;
 		new QListWidgetItem(
-				QString::fromStdString(this->images[i].filename),
+				QString::fromStdString(imageData->filename(i)),
 				this->imageList);
 		
 	}
@@ -25,6 +19,11 @@ void ImageListDisplay::setUp()
 	// set the selection procedure
 	this->imageList->setSelectionMode(QAbstractItemView::SingleSelection);
 	this->imageList->setItemSelected(this->imageList->item(0), true);
+}
+
+// ------------------------------------------------------------------------
+void ImageListDisplay::setUp()
+{
 }
 
 

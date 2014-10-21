@@ -2,12 +2,13 @@
 #define IMAGE_LIST_H
 
 #include "common.h"
+#include "containers.h"
 #include <QListWidget>
 
 class ImageListDisplay 
 {
 public:
-	ImageListDisplay(ImageDataList &imageData);
+	ImageListDisplay(DataContainer  * imageData);
 
 	void setUp();
 
@@ -16,7 +17,6 @@ public:
 	
 
 private:
-	ImageDataList images;
 	QListWidget * imageList;
 
 };

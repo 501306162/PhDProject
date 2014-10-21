@@ -7,14 +7,15 @@
 #include "common.h"
 #include "image_list.h"
 #include "image_viewer.h"
+#include "line.h"
+#include "containers.h"
 
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	MainWindow(ImageDataList &images);
-	void setImageData(ImageDataList &images);
+	MainWindow(DataContainer * data);
 	virtual ~MainWindow();
 
 protected:
@@ -23,11 +24,14 @@ protected:
 
 protected slots:
 	void imageSelectionChanged();
+	void addLinePressed();
 
 
 private:
-	ImageDataList images;
+	DataContainer  * data;
+	vtkImageData * getCurrentVTKImage();
 
+	QPushButton * getCheckedValveButton();
 
 	void createActions();
 	void setUpSignals();
@@ -37,7 +41,6 @@ private:
 	QWidget * createButtonGroup();
 	QWidget * createImageViewer();
 	QWidget * createImageControls();
-
 
 	ImageViewer * imageViewer;
 	ImageListDisplay * imageList;
@@ -55,6 +58,11 @@ private:
 	// sliders 
 	QSlider * tSlider;
 	QSlider * zSlider;
+
+	QButtonGroup *valveGroup;
+
+
+
 
 
 	unsigned int timeStep;

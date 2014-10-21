@@ -11,9 +11,11 @@
 #include <itkExtractImageFilter.h>
 #include <itkRegionOfInterestImageFilter.h>
 
+#include <vtkImageProperty.h>
+
 
 // ------------------------------------------------------------------------
-bool DataLoader::LoadData(ImageDataList &imageData)
+bool DataLoader::LoadData(DataList &imageData)
 {
 	FilenamesType filenames;
 	GetFilenames(filenames);
@@ -28,7 +30,7 @@ bool DataLoader::LoadData(ImageDataList &imageData)
 	for(unsigned int i = 0; i < filenames.size(); i++)
 	{
 		FilenameType fname = filenames[i];			
-		ImageData image;
+		DataInstance image;
 
 		LoadImage(fname, image);
 		image.filename = GetFileBasename(fname);
@@ -58,7 +60,7 @@ std::string DataLoader::GetFileBasename(const std::string &filename)
 
 
 // ------------------------------------------------------------------------
-void DataLoader::LoadImage(const std::string &filename, ImageData &image)
+void DataLoader::LoadImage(const std::string &filename, DataInstance &image)
 {
 	typedef itk::Image<unsigned short, 4> ImageType;
 	typedef itk::NrrdImageIO ImageIOType;
@@ -89,6 +91,7 @@ void DataLoader::LoadImage(const std::string &filename, ImageData &image)
 
 	for(unsigned int i = 0; i < timeSteps; i++)
 	{
+
 		typedef itk::Image<unsigned short, 3> TimeStepType;
 		typedef itk::ExtractImageFilter<ImageType, TimeStepType> ExtractorType;
 		typedef itk::ImageToVTKImageFilter<TimeStepType> VTKFilterType;
@@ -109,7 +112,7 @@ void DataLoader::LoadImage(const std::string &filename, ImageData &image)
 		extractor->SetDirectionCollapseToSubmatrix();
 		extractor->Update();
 		
-		ImageVolume imageVolume;
+		VolumeData imageVolume;
 
 
 
@@ -134,12 +137,25 @@ void DataLoader::LoadImage(const std::string &filename, ImageData &image)
 			vtkFilter->SetInput(roiFilter->GetOutput());
 			vtkFilter->Update();
 
-			vtkSmartPointer<vtkImageData> vtkImage = 
-				vtkSmartPointer<vtkImageData>::New();
-			vtkImage->DeepCopy(vtkFilter->GetOutput());
+			// build the data
+			DataHolder data;
+			data.vtkImage = vtkSmartPointer<vtkImageData>::New();
+			data.vtkImage->DeepCopy(vtkFilter->GetOutput());
+			data.itkImage = roiFilter->GetOutput();
+			data.timestep = i;
+			data.slice = j;
+
+			data.mapper = vtkSmartPointer<vtkImageSliceMapper>::New();
+			data.mapper->SetInputData(data.vtkImage);
+
+			data.actor = vtkSmartPointer<vtkImageSlice>::New();
+			data.actor->SetMapper(data.mapper);
+
+			data.actor->GetProperty()->SetColorLevel(177.48);
+			data.actor->GetProperty()->SetColorWindow(512.04);
 
 
-			imageVolume.push_back(vtkImage);
+			imageVolume.push_back(data);
 			
 		}
 

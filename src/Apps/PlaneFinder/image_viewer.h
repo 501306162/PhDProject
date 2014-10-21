@@ -13,7 +13,7 @@
 #include <vtkRenderer.h>
 
 #include "point_picker.h"
-
+#include "containers.h"
 
 class ImageViewer 
 {
@@ -31,16 +31,10 @@ public:
 
 	} ViewerData;
 
-	ImageViewer(ImageDataList &imageData);
+	ImageViewer(DataContainer * data);
 
 
-	void setViewedImage(unsigned int index);
-	void setViewedTimeStep(unsigned int timestep);
-	void setViewedSlice(unsigned int slice);
 	void updateImage();
-	unsigned int maxIndex();
-	unsigned int maxTimeStep();
-	unsigned int maxSlice();
 
 	QVTKWidget * getWidget() { return widget; }
 
@@ -48,15 +42,11 @@ protected:
 	void createViewerData();
 
 private:
-	ImageDataList images;
-	std::vector<ViewerData> viewerData;
+	DataContainer * data;
 	QVTKWidget * widget;
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<PointPicker> style;
 
-	unsigned int currentIndex;
-	unsigned int currentSlice;
-	unsigned int currentTimeStep;
 };
 
 #endif
