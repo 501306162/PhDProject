@@ -17,8 +17,8 @@ void PointPicker::OnLeftButtonDown()
 		vtkSmartPointer<vtkPropPicker>::New();
 	picker->Pick(clickPos[0], clickPos[1], 0, this->currentRenderer);
 
-	double * pos = picker->GetPickPosition();
-	std::cout << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+
+
 
 
 	// trigger the parent event 

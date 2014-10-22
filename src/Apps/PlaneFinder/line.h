@@ -19,12 +19,15 @@ public:
 
 	 static Line * NewLine(vtkImageData * image, Type type);
 
+	 Type getType() { return this->type; }
+
 
 
 	 void getColour(double * col);
 	 vtkSmartPointer<vtkPolyData> getPoly() { return this->poly; }
 
-	 static Type getType(unsigned int btnIndex);
+	 static Type getTypeEnum(unsigned int btnIndex);
+	 static std::string getTypeString(Type type);
 	 vtkActor * getActor() { return actor; }
 
 private:

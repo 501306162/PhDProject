@@ -6,6 +6,7 @@ set( SRCS
 	"image_viewer.cpp"
 	"point_picker.cpp"
 	"line.cpp"
+	"line_list.cpp"
 	"containers.cpp"
 	)
 

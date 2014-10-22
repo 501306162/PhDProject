@@ -17,12 +17,15 @@ public:
 	vtkImageSlice * getActor();
 	vtkImageData * getVTKImage();
 	std::vector<vtkActor*> getLines();
+	Line::List getLineData();
+
 
 	void addLine(Line * line);
 
 	void setViewedImage(unsigned int index);
 	void setViewedTimeStep(unsigned int timestep);
 	void setViewedSlice(unsigned int slice);
+	void removeLine(unsigned int index);
 
 
 	unsigned int maxIndex();
@@ -36,9 +39,9 @@ public:
 
 	std::string filename(unsigned int index);
 
+	DataHolder & getCurrentHolder();
 private:
 
-	DataHolder & getCurrentHolder();
 
 
 	DataList data;

@@ -35,8 +35,7 @@ void ImageViewer::updateImage()
 
 	renderer->ResetCamera();
 	style->SetRenderer(renderer);
-	style->SetActor(data->getActor());
-	style->SetImage(data->getVTKImage());
+	style->SetData(&data->getCurrentHolder());
 	widget->GetRenderWindow()->Render();
 }
 

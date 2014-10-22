@@ -27,10 +27,21 @@ void MainWindow::setUpSignals()
 
 	// button slots 
 	connect(this->addLineButton, SIGNAL(pressed()), this, SLOT(addLinePressed()));
+	connect(this->removeLineButton, SIGNAL(pressed()), this, SLOT(removeLinePressed()));
 
-	//connect(this->mvButton, SIGNAL(pressed()), this, SLOT(toggleValveType()));
-	//connect(this->tpButton, SIGNAL(pressed()), this, SLOT(toggleValveType()));
-	//connect(this->avButton, SIGNAL(pressed()), this, SLOT(toggleValveType()));
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::removeLinePressed()
+{
+	if(!lineList->lineSelected())
+		return; 
+
+	// get the line 
+	unsigned int selectedRow = lineList->getSelectedLineIndex();
+	data->removeLine(selectedRow);
+	lineList->updateLines();
+	imageViewer->updateImage();
 }
 
 
@@ -38,9 +49,10 @@ void MainWindow::setUpSignals()
 void MainWindow::addLinePressed()
 {
 	Line * line = Line::NewLine(data->getVTKImage(), 
-			Line::getType(valveGroup->checkedId()));
+			Line::getTypeEnum(valveGroup->checkedId()));
 	data->addLine(line);
 	imageViewer->updateImage();
+	lineList->updateLines();
 }
 
 
@@ -64,6 +76,7 @@ void MainWindow::imageSelectionChanged()
 	data->setViewedTimeStep(tSlider->value());
 	data->setViewedSlice(zSlider->value());
 	imageViewer->updateImage();
+	lineList->updateLines();
 
 }
 
@@ -120,6 +133,7 @@ QWidget * MainWindow::createLayout()
 
 	// on the left we have the image list and the buttons
 	leftLayout->addWidget(createImageList());
+	leftLayout->addWidget(createLineList());
 	leftLayout->addWidget(createImageControls());
 	leftLayout->addWidget(createButtonGroup());
 	leftWidget->setLayout(leftLayout);
@@ -136,6 +150,14 @@ QWidget * MainWindow::createLayout()
 
 	return widget;
 
+}
+
+
+// ------------------------------------------------------------------------
+QWidget * MainWindow::createLineList()
+{
+	lineList = new LineList(data);
+	return lineList->getWidget();
 }
 
 

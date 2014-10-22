@@ -8,6 +8,7 @@
 #include "image_list.h"
 #include "image_viewer.h"
 #include "line.h"
+#include "line_list.h"
 #include "containers.h"
 
 class MainWindow : public QMainWindow
@@ -25,6 +26,7 @@ protected:
 protected slots:
 	void imageSelectionChanged();
 	void addLinePressed();
+	void removeLinePressed();
 
 
 private:
@@ -40,10 +42,13 @@ private:
 	QWidget * createImageList();
 	QWidget * createButtonGroup();
 	QWidget * createImageViewer();
+	QWidget * createLineList();
 	QWidget * createImageControls();
 
 	ImageViewer * imageViewer;
 	ImageListDisplay * imageList;
+	LineList * lineList;
+
 
 
 	// set of buttons 

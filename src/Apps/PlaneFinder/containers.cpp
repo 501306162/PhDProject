@@ -17,6 +17,20 @@ void DataContainer::LoadData(const std::string & folder)
 
 
 // ------------------------------------------------------------------------
+Line::List DataContainer::getLineData()
+{
+	DataHolder holder = getCurrentHolder();
+	return holder.lines;
+}
+
+// ------------------------------------------------------------------------
+void DataContainer::removeLine(unsigned int index)
+{
+	DataHolder & holder = getCurrentHolder();
+	holder.lines.erase(holder.lines.begin()+index);
+}
+
+// ------------------------------------------------------------------------
 vtkImageSlice * DataContainer::getActor()
 {
 	return data[currentIndex].images[currentTimeStep][currentSlice].actor;

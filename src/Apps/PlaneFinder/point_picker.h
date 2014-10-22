@@ -8,6 +8,8 @@
 #include <vtkImageSlice.h>
 #include <vtkImageData.h>
 
+#include "common.h"
+
 class PointPicker : public vtkInteractorStyleImage 
 {
 public:
@@ -17,13 +19,11 @@ public:
 	virtual void OnLeftButtonDown();
 
 	void SetRenderer(vtkRenderer * renderer) { this->currentRenderer = renderer; }
-	void SetActor(vtkImageSlice *actor) { this->currentActor = actor; }
-	void SetImage(vtkImageData * image) { this->image = image; }
+	void SetData(DataHolder * data) { this->data = data; }
 
 private:
 	vtkRenderer * currentRenderer;
-	vtkImageSlice * currentActor;
-	vtkImageData * image;
+	DataHolder * data;
 };
 
 
