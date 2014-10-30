@@ -33,8 +33,13 @@ public:
 
 	ImageViewer(DataContainer * data);
 
+	void resetCamera();
+	void setData(DataContainer * data);
 
-	void updateImage();
+
+	void updateImage(bool reset = false);
+	void showAllLines();
+	void setLineToDisplay(Line::Type type);
 
 	QVTKWidget * getWidget() { return widget; }
 
@@ -46,6 +51,7 @@ private:
 	QVTKWidget * widget;
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<PointPicker> style;
+	std::vector<vtkActor*> displayedLines;
 
 };
 

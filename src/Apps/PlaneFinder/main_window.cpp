@@ -1,34 +1,105 @@
 #include "main_window.h"
 
 #include <QtCore>
+#include "io.h"
 
 
 // ------------------------------------------------------------------------
-MainWindow::MainWindow(DataContainer *data) : data(data)
+void MainWindow::saveActionPressed()
 {
-	// set up the window
-	createActions();
-	setCentralWidget(createLayout());
-	setUpSignals();
+	if(okToSave())
+	{
+		QString filename = getSaveName();
+		if(filename.isEmpty())
+			return;
+
+		bool ok = IO::Save(filename.toStdString(), data);
+		if(!ok)
+		{
+			std::cout << "File couldn't be saved" << std::endl;
+		}
+	}
 }
 
 
 // ------------------------------------------------------------------------
-void MainWindow::setUpSignals()
+QString MainWindow::getSaveName()
 {
-	// image control slots
-	connect(this->imageList->getImageList(), SIGNAL(itemSelectionChanged()),
-		this, SLOT(imageSelectionChanged()));
-	connect(this->zSlider, SIGNAL(valueChanged(int)),
-		this, SLOT(imageSelectionChanged()));
-	connect(this->tSlider, SIGNAL(valueChanged(int)),
-		this, SLOT(imageSelectionChanged()));
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+			"/Users/oliverferoze/Uni/Data", tr("Json Files (*.json *.txt)"));
+
+	return fileName;
+
+}
+
+// ------------------------------------------------------------------------
+bool MainWindow::okToSave()
+{
+	
+	if(!data->linesAreLocked())
+	{
+		int ret = QMessageBox::question(this, tr("Hi"),
+				tr("There are unlocked lines in this session, These will be discarded"),
+				QMessageBox::Ok | QMessageBox::Cancel);
+
+		if(ret == QMessageBox::Ok)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		return true;
+	}
+}
 
 
-	// button slots 
-	connect(this->addLineButton, SIGNAL(pressed()), this, SLOT(addLinePressed()));
-	connect(this->removeLineButton, SIGNAL(pressed()), this, SLOT(removeLinePressed()));
+// ------------------------------------------------------------------------
+void MainWindow::tSliderRight()
+{
+	int val = tSlider->value();
+	if(val == tSlider->maximum()) 
+		tSlider->setValue(tSlider->minimum());
+	else
+		tSlider->setValue(val+1);
+}
 
+// ------------------------------------------------------------------------
+void MainWindow::tSliderLeft()
+{
+	int val = tSlider->value();
+	if(val == tSlider->minimum()) 
+		tSlider->setValue(tSlider->maximum());
+	else
+		tSlider->setValue(val-1);
+}
+
+
+// ------------------------------------------------------------------------
+void MainWindow::lineChanged()
+{
+	if(!lineList->lineSelected())
+	{
+		imageViewer->showAllLines();
+	}
+	else
+	{
+		Line::Type type = lineList->getSelectedLineType();
+		lineList->setCurrentIndex();
+		imageViewer->setLineToDisplay(type);
+	}
+
+	imageViewer->updateImage();
+
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::propagateLinePressed()
+{
+	if(!lineList->lineSelected())
+		return; 
+
+	data->propagateLine(lineList->getSelectedLineType());
 }
 
 // ------------------------------------------------------------------------
@@ -38,8 +109,7 @@ void MainWindow::removeLinePressed()
 		return; 
 
 	// get the line 
-	unsigned int selectedRow = lineList->getSelectedLineIndex();
-	data->removeLine(selectedRow);
+	data->removeLine(lineList->getSelectedLineType());
 	lineList->updateLines();
 	imageViewer->updateImage();
 }
@@ -66,19 +136,32 @@ QPushButton * MainWindow::getCheckedValveButton()
 		return avButton;
 	if(tpButton->isChecked())
 		return tpButton;
+	
+	return NULL;
 }
 
 // ------------------------------------------------------------------------
 void MainWindow::imageSelectionChanged()
 {
+	if(data == NULL) return;
+
 	data->setViewedImage(imageList->selectedIndex());
 	updateSliders();
 	data->setViewedTimeStep(tSlider->value());
 	data->setViewedSlice(zSlider->value());
-	imageViewer->updateImage();
-	lineList->updateLines();
+	updateAll(true);
 
 }
+
+
+// ------------------------------------------------------------------------
+void MainWindow::sliderSelectionChanged()
+{
+	data->setViewedTimeStep(tSlider->value());
+	data->setViewedSlice(zSlider->value());
+	updateAll();
+}
+
 
 // ------------------------------------------------------------------------
 void MainWindow::updateSliders()
@@ -103,106 +186,36 @@ void MainWindow::updateSliders()
 
 
 // ------------------------------------------------------------------------
-QWidget * MainWindow::createImageControls()
+void MainWindow::setInfoPane()
 {
-	QGridLayout *layout = new QGridLayout;
-	QLabel * tLabel = new QLabel("Time Step: ");
-	QLabel * zLabel = new QLabel("Slice: ");
-	tSlider = new QSlider;
-	tSlider->setOrientation(Qt::Horizontal);
-	zSlider = new QSlider;
-	zSlider->setOrientation(Qt::Horizontal);
-	
-	layout->addWidget(zLabel, 0, 0);
-	layout->addWidget(tLabel, 1, 0);
-	layout->addWidget(zSlider, 0, 1);
-	layout->addWidget(tSlider, 1, 1);
+	if(data == NULL) return;
 
-	QWidget * widget = new QWidget;
-	widget->setLayout(layout);
-	return widget;
-
-}
-
-// ------------------------------------------------------------------------
-QWidget * MainWindow::createLayout()
-{
-	QWidget * widget = new QWidget();
-	QWidget * leftWidget = new QWidget();
-	QVBoxLayout * leftLayout = new QVBoxLayout();
-
-	// on the left we have the image list and the buttons
-	leftLayout->addWidget(createImageList());
-	leftLayout->addWidget(createLineList());
-	leftLayout->addWidget(createImageControls());
-	leftLayout->addWidget(createButtonGroup());
-	leftWidget->setLayout(leftLayout);
-	leftWidget->setMaximumWidth(300);
-
-
-
-	QHBoxLayout * mainLayout = new QHBoxLayout;
-	mainLayout->addWidget(leftWidget);
-	mainLayout->addWidget(createImageViewer());
-	
-
-	widget->setLayout(mainLayout);
-
-	return widget;
+	QString value = QString::fromStdString(data->getFolderName());
+	folderValue->setText(value);
 
 }
 
 
 // ------------------------------------------------------------------------
-QWidget * MainWindow::createLineList()
+void MainWindow::lockLine()
 {
-	lineList = new LineList(data);
-	return lineList->getWidget();
-}
+	if(!lineList->lineSelected())
+		return; 
 
+	this->data->lockLine(this->lineList->getSelectedLineType());
+	updateAll();
+}
 
 // ------------------------------------------------------------------------
-QWidget * MainWindow::createButtonGroup()
+void MainWindow::updateAll(bool reset)
 {
-	QGroupBox * buttonBox = new QGroupBox;
-	addLineButton = new QPushButton("Add Line");
-	removeLineButton = new QPushButton("Remove Line");
-	propagateLineButton = new QPushButton("Propagate Line");
-	
-	mvButton = new QPushButton("Mitral Valve");
-	tpButton = new QPushButton("Tricuspid Valve");
-	avButton = new QPushButton("Auortic Valve");
-	mvButton->setCheckable(true);
-	tpButton->setCheckable(true);
-	avButton->setCheckable(true);
-
-	mvButton->setChecked(true);
-
-	valveGroup = new QButtonGroup;
-	valveGroup->addButton(mvButton,0);
-	valveGroup->addButton(tpButton,1);
-	valveGroup->addButton(avButton,2);
-	valveGroup->setExclusive(true);
-
-
-	QVBoxLayout * layout = new QVBoxLayout;
-	layout->addWidget(addLineButton);
-	layout->addWidget(removeLineButton);
-	layout->addWidget(propagateLineButton);
-
-	QFrame * line = new QFrame;
-	line->setFrameShape(QFrame::HLine);
-	line->setFrameShadow(QFrame::Sunken);
-	layout->addWidget(line);
-
-
-	layout->addWidget(mvButton);
-	layout->addWidget(tpButton);
-	layout->addWidget(avButton);
-	
-	buttonBox->setLayout(layout);
-	return buttonBox;
+	lineChanged();
+	imageViewer->updateImage(reset);
+	lineList->updateLines();
 }
+
+
+
 
 // ------------------------------------------------------------------------
 void MainWindow::closeEvent(QCloseEvent * event)
@@ -211,28 +224,111 @@ void MainWindow::closeEvent(QCloseEvent * event)
 }
 
 // ------------------------------------------------------------------------
-void MainWindow::createActions()
+void MainWindow::newActionPressed()
 {
+	// check that it is ok to overwrite
+	if(!okToOverwrite())
+		return;
+
+	// get a filename
+	QString fileName = getNewFolder();
+	if(fileName.isEmpty())
+		return;
+
+	// delete old data 
+	delete data;
+
+	DataContainer * newData = new DataContainer;
+	newData->LoadData(fileName.toStdString());
+	initialiseFromData(newData);
+}
+
+
+// ------------------------------------------------------------------------
+void MainWindow::loadActionPressed()
+{
+	// check that it is ok to overwrite
+	if(!okToOverwrite())
+		return;
+
+	QString fileName = getLoadFile();
+
+	DataContainer * data = IO::Load(fileName.toStdString());
+	if(data != NULL)
+		initialiseFromData(data);
+
+}
+
+
+// ------------------------------------------------------------------------
+QString MainWindow::getLoadFile()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, 
+			tr("Select the file that you want to load"),
+			"/Users/oliverferoze/Uni/Data/LineOutput",
+			tr("Json Files (*.json *.txt)"));
 	
+	return fileName;
+}
+
+
+// ------------------------------------------------------------------------
+QString MainWindow::getNewFolder()
+{
+	QString fileName = QFileDialog::getExistingDirectory(this, 
+			tr("Set a folder to read from"),
+			"/Users/oliverferoze/Uni/Data",
+			QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	return fileName;
 }
 
 // ------------------------------------------------------------------------
-QWidget * MainWindow::createImageList()
+bool MainWindow::okToOverwrite()
 {
-	this->imageList = new ImageListDisplay(this->data);
-	this->imageList->setUp();
-	return this->imageList->getImageList();
+	if(data == NULL)
+		return true;
+
+	int ret = QMessageBox::question(this, tr("Ok To Save"),
+			tr("You are in the middle of a session\n do you want to save?"),
+			QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+
+
+	// check the return value from the box
+	switch(ret)
+	{
+		case QMessageBox::Save :
+			saveActionPressed();
+			return true;
+		case QMessageBox::Cancel :
+			return false;
+		case QMessageBox::Discard :
+			return true;
+		default:
+			break;
+	}
+
+	return true;
 }
+
+
+
 
 // ------------------------------------------------------------------------
-QWidget * MainWindow::createImageViewer()
+void MainWindow::initialiseFromData(DataContainer * data)
 {
-	imageViewer = new ImageViewer(this->data);
-	imageViewer->getWidget()->setMinimumSize(QSize(500,500));
-	imageSelectionChanged();
-	return imageViewer->getWidget();
-}
+	this->data = data;
+		
+	QString folderName = QString::fromStdString(data->getFolderName());
+	setInfoPane();
+	
+	imageViewer->setData(this->data);
+	lineList->setData(this->data);
+	imageList->showList(this->data);
+	
+	imageViewer->updateImage(true);
+	lineList->updateLines();
 
+}
 
 // ------------------------------------------------------------------------
 MainWindow::~MainWindow()

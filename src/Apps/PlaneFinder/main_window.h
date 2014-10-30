@@ -10,6 +10,7 @@
 #include "line.h"
 #include "line_list.h"
 #include "containers.h"
+#include "key_controls.h"
 
 class MainWindow : public QMainWindow
 {
@@ -17,7 +18,12 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow(DataContainer * data);
+
+	MainWindow();
+
 	virtual ~MainWindow();
+
+
 
 protected:
 	void closeEvent(QCloseEvent * event);
@@ -25,30 +31,71 @@ protected:
 
 protected slots:
 	void imageSelectionChanged();
+	void sliderSelectionChanged();
 	void addLinePressed();
 	void removeLinePressed();
+	void propagateLinePressed();
+	void lineChanged();
+	void tSliderRight();
+	void tSliderLeft();
+	void lockLine();
+	void saveActionPressed();
+	void newActionPressed();
+	void loadActionPressed();
+
 
 
 private:
+	void setUpWindow();
+	void initialiseFromData(DataContainer * data);
+
+
 	DataContainer  * data;
 	vtkImageData * getCurrentVTKImage();
-
 	QPushButton * getCheckedValveButton();
+
+	void updateAll(bool reset = false);
+
+
+	bool okToSave();
+	QString getSaveName();
 
 	void createActions();
 	void setUpSignals();
 	void updateSliders();
+
+	QWidget * createInfoPane();
+	void setInfoPane();
+
 	QWidget * createLayout();
+
 	QWidget * createImageList();
+	void setImageList();
+	
+
 	QWidget * createButtonGroup();
 	QWidget * createImageViewer();
 	QWidget * createLineList();
 	QWidget * createImageControls();
 
+
+	bool okToOverwrite();
+
+	QString getNewFolder();
+	QString getLoadFile();
+
 	ImageViewer * imageViewer;
 	ImageListDisplay * imageList;
 	LineList * lineList;
+	KeyControls * controls;
 
+	QLabel * folderValue;
+
+
+	QMenu * fileMenu;
+	QAction * loadAction;
+	QAction * newAction;
+	QAction * saveAction;
 
 
 	// set of buttons 
@@ -59,6 +106,8 @@ private:
 	QPushButton * addLineButton;
 	QPushButton * removeLineButton;
 	QPushButton * propagateLineButton;
+	QPushButton * lockLineButton;
+
 
 	// sliders 
 	QSlider * tSlider;

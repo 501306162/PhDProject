@@ -32,7 +32,7 @@ typedef struct data_holder_
 	
 	unsigned int slice;
 	unsigned int timestep;
-	Line::List lines;
+	Line::Map lines;
 
 } DataHolder;
 

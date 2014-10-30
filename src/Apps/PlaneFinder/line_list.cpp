@@ -6,18 +6,23 @@
 // ------------------------------------------------------------------------
 LineList::LineList(DataContainer * data)
 {
-	this->data = data;
+	setData(data);
 	this->table = new QTableWidget;
 	setUpTable();
 }
 
+// ------------------------------------------------------------------------
+void LineList::setData(DataContainer * data)
+{
+	this->data = data;
+}
 
 // ------------------------------------------------------------------------
 void LineList::setUpTable()
 {
 	QStringList headers;
-	headers << "Num";
 	headers << "Type";
+	headers << "Locked";
 
 	this->table->setColumnCount(2);
 	this->table->setHorizontalHeaderLabels(headers);
@@ -34,6 +39,7 @@ void LineList::setUpTable()
 	this->table->setSelectionBehavior(QAbstractItemView::SelectRows);
 	this->table->setSelectionMode(QAbstractItemView::SingleSelection);
 
+
 }
 
 
@@ -46,9 +52,12 @@ bool LineList::lineSelected()
 		return false;
 }
 
+
 // ------------------------------------------------------------------------
 unsigned int LineList::getSelectedLineIndex()
 {
+	if(!lineSelected())
+		return -1;
 
 	QTableWidgetItem * item = this->table->selectedItems().takeFirst();
 	return item->row();
@@ -61,21 +70,49 @@ void LineList::updateLines()
 	removeEntrys();
 	
 	// set the new entries
-	Line::List lines = data->getLineData();
+	Line::Map lines = data->getLineData();
 	table->setRowCount(lines.size());
 
-
-	for(unsigned int i = 0; i < lines.size(); i++)
+	Line::Map::iterator it = lines.begin();
+	int count =  0;
+	while(it != lines.end())
 	{
-		Line * line = lines[i];
-		QString num = QString::number(i+1);
+		Line * line = it->second;
 		QString type = QString::fromStdString( Line::getTypeString(line->getType()) );
 
-		QTableWidgetItem *item1 = new QTableWidgetItem(num);
-		table->setItem(i,0,item1);
-		QTableWidgetItem *item2 = new QTableWidgetItem(type);
-		table->setItem(i,1,item2);
+		QTableWidgetItem *item1 = new QTableWidgetItem(type);
+		table->setItem(count,0,item1);
+
+				
+
+		QString lockedVal = "Unlocked";
+		if(line->isLocked())
+			lockedVal = "Locked";
+	
+
+		QTableWidgetItem *item2 = new QTableWidgetItem(lockedVal);
+		table->setItem(count,1,item2);
+
+		currentLines.push_back(line);
+
+		++it; ++count;
 	}
+
+	if(currentIndex >= 0 && currentIndex < (int) currentLines.size())
+	{
+		QTableWidgetItem * item = table->item(currentIndex, 0);
+		table->setItemSelected(item,true);
+	}
+
+}
+
+
+// ------------------------------------------------------------------------
+Line::Type LineList::getSelectedLineType()
+{
+	unsigned int index = getSelectedLineIndex();
+	
+	return currentLines[index]->getType();	
 }
 
 
@@ -86,4 +123,7 @@ void LineList::removeEntrys()
 	{
 		table->removeRow(0);
 	}
+
+	// clear the line list
+	currentLines.clear();
 }

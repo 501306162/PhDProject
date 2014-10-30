@@ -14,6 +14,9 @@ public:
 
 	QListWidget * getImageList() { return imageList; }
 	int selectedIndex();
+	void showList(DataContainer * imageData);
+
+
 	
 
 private:

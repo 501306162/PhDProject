@@ -1,6 +1,7 @@
 #ifndef LINE_H
 #define LINE_H
 
+#include <map>
 
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
@@ -12,14 +13,26 @@ class Line
 {
 public:
 	typedef std::vector<Line*> List;
+	
 
 	enum Type { MV, TP, AV };
 	
+	typedef std::map<Type, Line*> Map;
+
 	Line();
 
 	 static Line * NewLine(vtkImageData * image, Type type);
+	 static Line * NewLine(Type type, double * p1, double * p2);
+
 
 	 Type getType() { return this->type; }
+
+	 Line * copy();
+
+	 bool isLocked() { return this->locked; }
+	 void setLocked(bool val) { this->locked = val; }
+	 void setPoint1(double x, double y, double z);
+	 void setPoint2(double x, double y, double z);
 
 
 
@@ -44,6 +57,7 @@ private:
 	vtkSmartPointer<vtkActor> actor;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
 
+	bool locked;
 
 };
 

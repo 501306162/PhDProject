@@ -13,7 +13,98 @@
 // ------------------------------------------------------------------------
 Line::Line()
 {
+	this->poly = vtkSmartPointer<vtkPolyData>::New();
+	this->mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	this->actor = vtkSmartPointer<vtkActor>::New();
 }
+
+
+// ------------------------------------------------------------------------
+Line * Line::copy()
+{
+	Line * line = new Line();
+	line->x = x;
+	line->x2 = x2;
+	line->y = y;
+	line->y2 = y2;
+	line->z = z;
+	line->z2 = z2;
+
+	line->poly->DeepCopy(poly);
+
+	line->mapper->SetInputData(line->poly);
+	line->actor->SetMapper(line->mapper);
+	line->actor->GetProperty()->SetLineWidth(2.0);
+	line->actor->GetProperty()->SetPointSize(5.0);
+	line->actor->GetProperty()->SetRepresentationToWireframe();
+
+	double col[3];
+	line->getColour(col);
+	line->actor->GetProperty()->SetColor(col);
+
+
+	line->type = type;
+
+	return line;
+}
+
+// ------------------------------------------------------------------------
+Line * Line::NewLine(Type type, double * p1, double * p2)
+{
+	Line * line = new Line();
+	line->type = type;
+
+	line->x = p1[0];
+	line->x2 = p2[0];
+	line->y = p1[1];
+	line->y2 = p2[1];
+	line->z = p1[2];
+	line->z2 = p2[2];
+
+
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	points->InsertNextPoint(p1[0],p1[1],p1[2]);
+	points->InsertNextPoint(p2[0],p2[1],p2[2]);
+
+	vtkSmartPointer<vtkVertex> v1 = vtkSmartPointer<vtkVertex>::New();
+	vtkSmartPointer<vtkVertex> v2 = vtkSmartPointer<vtkVertex>::New();
+	v1->GetPointIds()->SetId(0,0);
+	v2->GetPointIds()->SetId(0,1);
+
+	vtkSmartPointer<vtkCellArray> vertices = vtkSmartPointer<vtkCellArray>::New();
+	vertices->InsertNextCell(v1);
+	vertices->InsertNextCell(v2);
+
+	vtkSmartPointer<vtkLine> pline = vtkSmartPointer<vtkLine>::New();
+	pline->GetPointIds()->SetId(0,0);
+	pline->GetPointIds()->SetId(1,1);
+
+	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	lines->InsertNextCell(pline);
+	
+
+
+	// create the polydata 
+	line->poly->SetPoints(points);
+	line->poly->SetLines(lines);
+	line->poly->SetVerts(vertices);
+	line->poly->Modified();
+
+	line->mapper->SetInputData(line->poly);
+	
+
+	line->actor->SetMapper(line->mapper);
+	line->actor->GetProperty()->SetLineWidth(2.0);
+	line->actor->GetProperty()->SetPointSize(5.0);
+	line->actor->GetProperty()->SetRepresentationToWireframe();
+
+	double col[3];
+	line->getColour(col);
+	line->actor->GetProperty()->SetColor(col);
+
+	return line;
+}
+
 
 // ------------------------------------------------------------------------
 Line * Line::NewLine(vtkImageData * image, Type type)
@@ -58,16 +149,13 @@ Line * Line::NewLine(vtkImageData * image, Type type)
 
 
 	// create the polydata 
-	line->poly = vtkSmartPointer<vtkPolyData>::New();
 	line->poly->SetPoints(points);
 	line->poly->SetLines(lines);
 	line->poly->SetVerts(vertices);
 
-	line->mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	line->mapper->SetInputData(line->poly);
 	
 
-	line->actor = vtkSmartPointer<vtkActor>::New();
 	line->actor->SetMapper(line->mapper);
 	line->actor->GetProperty()->SetLineWidth(2.0);
 	line->actor->GetProperty()->SetPointSize(5.0);

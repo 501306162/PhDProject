@@ -8,17 +8,24 @@
 
 int main(int argc, char ** argv)
 {
-	std::string inputFolder = argv[1];
-
-
-	DataContainer * container = new DataContainer;
-	container->LoadData(inputFolder);
-
-
 	QApplication app(argc, argv);
+	MainWindow * window;
 
-	MainWindow mainWindow(container);
-	mainWindow.show();
+	if(argc > 1)
+	{
+		std::string inputFolder = argv[1];
+		DataContainer * container = new DataContainer;
+		container->LoadData(inputFolder);
+		window = new MainWindow(container);
+	}
+	else
+	{
+		window =  new MainWindow;
+	}
+
+	window->show();
 
 	return app.exec();
+
+
 }

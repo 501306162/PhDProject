@@ -12,6 +12,9 @@ public:
 
 	QTableWidget * getWidget() { return this->table; }
 
+
+	void setData(DataContainer * data);
+
 	void updateLines();
 	
 	void removeEntrys();
@@ -19,10 +22,18 @@ public:
 	unsigned int getSelectedLineIndex();
 	bool lineSelected();
 
+	Line::Type getSelectedLineType();
+
+	void setCurrentIndex() { this->currentIndex = getSelectedLineIndex(); }
+
+
 
 private:
 	DataContainer * data;
 	QTableWidget * table;
+
+	std::vector<Line *> currentLines;
+	int currentIndex;
 
 };
 

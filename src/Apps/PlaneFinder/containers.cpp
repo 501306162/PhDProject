@@ -1,6 +1,9 @@
 #include "containers.h"
 #include "data_loader.h"
 
+
+#include <QFileInfo>
+
 // ------------------------------------------------------------------------
 void DataContainer::LoadData(const std::string & folder)
 {
@@ -13,21 +16,93 @@ void DataContainer::LoadData(const std::string & folder)
 	currentTimeStep = 0;
 	currentSlice = 0;
 
+
+	QFileInfo info(QString::fromStdString(folder));
+	this->folderName = folder;
+
 }
 
 
 // ------------------------------------------------------------------------
-Line::List DataContainer::getLineData()
+bool DataContainer::linesAreLocked()
+{
+	for(unsigned int i = 0; i < numImages(); i++)
+	{
+		for(unsigned int j = 0; j < numTimeSteps(i); j++)
+		{
+			for(unsigned int k = 0; k < numSlices(i,j); k++)
+			{
+				Line::Map &lines = data[i].images[j][k].lines;
+				Line::Map::iterator mapIt = lines.begin();
+				while(mapIt != lines.end())
+				{
+					if(!mapIt->second->isLocked())
+						return false;
+					++mapIt;
+				}
+			}
+			
+		}		
+	}
+	return true;
+}
+
+// ------------------------------------------------------------------------
+std::string DataContainer::imageName(unsigned int index)
+{
+	return data[index].filename;
+}
+
+
+// ------------------------------------------------------------------------
+DataInstance & DataContainer::getInstance(unsigned int index)
+{
+	return data[index];
+}
+
+// ------------------------------------------------------------------------
+void DataContainer::lockLine(Line::Type type)
+{
+	DataHolder &holder = getCurrentHolder();
+	Line * line = holder.lines[type];
+
+	line->setLocked(!line->isLocked());
+}
+
+// ------------------------------------------------------------------------
+void DataContainer::propagateLine(Line::Type lineType)
+{
+	DataHolder &holder = getCurrentHolder();
+	Line * line = holder.lines[lineType];
+
+	// loop through all timesteps of this sequence 
+	DataInstance &sequence = this->data[currentIndex];
+	for(unsigned int i = currentTimeStep+1; i < sequence.images.size(); i++)
+	{
+		// create and add a copy of the line
+		Line * newLine = line->copy();	
+		Line::Map &lmap = sequence.images[i][currentSlice].lines;
+		
+		if(lmap.count(newLine->getType()) > 0)
+			delete lmap[newLine->getType()];
+
+		sequence.images[i][currentSlice].lines[lineType] = newLine;
+	}
+	
+}
+
+// ------------------------------------------------------------------------
+Line::Map DataContainer::getLineData()
 {
 	DataHolder holder = getCurrentHolder();
 	return holder.lines;
 }
 
 // ------------------------------------------------------------------------
-void DataContainer::removeLine(unsigned int index)
+void DataContainer::removeLine(Line::Type lineType)
 {
 	DataHolder & holder = getCurrentHolder();
-	holder.lines.erase(holder.lines.begin()+index);
+	holder.lines.erase(lineType);
 }
 
 // ------------------------------------------------------------------------
@@ -99,7 +174,14 @@ std::string DataContainer::filename(unsigned int index)
 // ------------------------------------------------------------------------
 void DataContainer::addLine(Line *line)
 {
-	getCurrentHolder().lines.push_back(line);
+	addLine(line, currentIndex, currentTimeStep, currentSlice);
+}
+
+
+// -----------------------------------------------------------------------
+void DataContainer::addLine(Line * line, int index, int time, int slice)
+{
+	data[index].images[time][slice].lines[line->getType()] = line;
 }
 
 
@@ -109,15 +191,31 @@ DataHolder & DataContainer::getCurrentHolder()
 	return data[currentIndex].images[currentTimeStep][currentSlice];
 }
 
+
+// ------------------------------------------------------------------------
+DataInstance & DataContainer::getInstance(const std::string &filename)
+{
+	for(unsigned int i = 0; i < data.size(); i++)
+	{
+		if(filename.compare(data[i].filename) == 0)
+			return data[i];		
+	}
+
+	return data.front();
+}
+
+
 // ------------------------------------------------------------------------
 std::vector<vtkActor *> DataContainer::getLines()
 {
 	DataHolder dinst = getCurrentHolder();
 	std::vector<vtkActor*> output;
 
-	for(unsigned int i = 0; i < dinst.lines.size(); i++)
+	Line::Map::iterator it = dinst.lines.begin();
+	while(it != dinst.lines.end())
 	{
-		output.push_back(dinst.lines[i]->getActor());		
+		output.push_back(it->second->getActor());		
+		++it;
 	}
 
 	return output;

@@ -6,6 +6,16 @@
 ImageListDisplay::ImageListDisplay(DataContainer *imageData)
 {
 	imageList = new QListWidget;
+	showList(imageData);
+}
+
+
+// ------------------------------------------------------------------------
+void ImageListDisplay::showList(DataContainer * imageData)
+{
+	if(imageData == NULL)
+		return;
+
 	for(unsigned int i = 0; i < imageData->numImages(); i++)
 	{
 		std::cout << imageData->filename(i) << std::endl;
@@ -30,6 +40,8 @@ void ImageListDisplay::setUp()
 // ------------------------------------------------------------------------
 int ImageListDisplay::selectedIndex()
 {
+	if(this->imageList->selectedItems().size() == 0)
+		return -1;	
 	return this->imageList->row(this->imageList->selectedItems()[0]);	
 
 }
