@@ -3,24 +3,33 @@
 
 #include "common.h"
 #include "containers.h"
-#include <QListWidget>
+#include <QTableWidget>
 
 class ImageListDisplay 
 {
 public:
+
+	std::string getImageTypeString();
+
+
 	ImageListDisplay(DataContainer  * imageData);
 
 	void setUp();
 
-	QListWidget * getImageList() { return imageList; }
+	QTableWidget * getImageList() { return imageList; }
 	int selectedIndex();
-	void showList(DataContainer * imageData);
+	void setData(DataContainer * data);
+	void showList();
+	void setSelection(unsigned int row);
 
 
 	
 
 private:
-	QListWidget * imageList;
+
+	DataContainer * data;
+
+	QTableWidget * imageList;
 
 };
 

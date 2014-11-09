@@ -9,7 +9,7 @@ class DataContainer
 public:
 
 
-	DataContainer() {}
+	DataContainer();
 	virtual ~DataContainer() {}
 
 	void LoadData(const std::string & folder);
@@ -29,6 +29,10 @@ public:
 	void propagateLine(Line::Type type);
 	void lockLine(Line::Type type);
 
+	DataInstance::ImageType imageType(unsigned int index);
+	std::string imageTypeString(unsigned int index);
+	void setImageType(unsigned int index, const std::string &type);
+
 	std::string getFolderName() { return this->folderName; }
 
 	unsigned int maxIndex();
@@ -45,6 +49,9 @@ public:
 	DataInstance & getInstance(const std::string &filename);
 
 	std::string filename(unsigned int index);
+	void setSaveName(const std::string &name) { saveName = name; }
+	bool hasSaveName();
+	std::string getSaveName() { return saveName; }
 
 
 	bool linesAreLocked();
@@ -54,6 +61,7 @@ private:
 
 
 	std::string folderName;
+	std::string saveName;
 
 	DataList data;
 

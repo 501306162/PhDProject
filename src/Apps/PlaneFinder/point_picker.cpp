@@ -12,9 +12,12 @@
 // ------------------------------------------------------------------------
 PointPicker::PointPicker()
 {
+	pickTolerance = 0.01;
+
+
 	pointPicker = vtkSmartPointer<vtkPointPicker>::New();
 	cellPicker = vtkSmartPointer<vtkCellPicker>::New();
-	pointPicker->SetTolerance(2.0);
+	pointPicker->SetTolerance(pickTolerance);
 
 
 	// set up the ghost point
@@ -55,11 +58,9 @@ void PointPicker::OnLeftButtonDown()
 
 	if(PointAtPickLocation())
 	{
-		this->ghostActor->VisibilityOn();
-		this->pointPicker->SetTolerance(0.5);
 		this->isMoving = true;
-		std::cout << "Moving point" << std::endl;
 		this->pickedPoint = pointPicker->GetPointId();
+		std::cout << "Moving point: " << this->pickedPoint << std::endl;
 		this->pickedData = dynamic_cast<vtkPolyData*>(pointPicker->GetDataSet());
 
 		SetPointLocation();
@@ -124,7 +125,7 @@ void PointPicker::OnMouseMove()
 void PointPicker::OnLeftButtonUp()
 {
 	isMoving = false;
-	this->pointPicker->SetTolerance(2.0);
+	this->pointPicker->SetTolerance(pickTolerance);
 }
 
 

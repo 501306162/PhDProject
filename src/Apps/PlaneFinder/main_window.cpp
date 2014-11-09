@@ -3,9 +3,31 @@
 #include <QtCore>
 #include "io.h"
 
-
 // ------------------------------------------------------------------------
 void MainWindow::saveActionPressed()
+{
+	if(okToSave())
+	{
+		if(!data->hasSaveName())
+			return saveAsActionPressed();
+
+		std::string filename = data->getSaveName();
+		saveData(filename);
+	}
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::saveData(const std::string &filename)
+{
+	bool ok = IO::Save(filename, data);
+	if(!ok)
+	{
+		std::cout << "File couldn't be saved" << std::endl;
+	}
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::saveAsActionPressed()
 {
 	if(okToSave())
 	{
@@ -13,12 +35,16 @@ void MainWindow::saveActionPressed()
 		if(filename.isEmpty())
 			return;
 
-		bool ok = IO::Save(filename.toStdString(), data);
-		if(!ok)
-		{
-			std::cout << "File couldn't be saved" << std::endl;
-		}
+		saveData(filename.toStdString());
 	}
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::loadData(const std::string &filename)
+{
+	DataContainer * data = IO::Load(filename);
+	if(data != NULL)
+		initialiseFromData(data);
 }
 
 
@@ -32,25 +58,38 @@ QString MainWindow::getSaveName()
 
 }
 
+
+// ------------------------------------------------------------------------
+void MainWindow::imageTypePressed()
+{
+	QString type = imageTypeCombo->currentText();
+	unsigned int selectedIndex = imageList->selectedIndex();
+	data->setImageType(selectedIndex, type.toStdString());
+	imageList->showList();
+	imageList->setSelection(selectedIndex);
+
+}
+
 // ------------------------------------------------------------------------
 bool MainWindow::okToSave()
 {
 	
-	if(!data->linesAreLocked())
-	{
-		int ret = QMessageBox::question(this, tr("Hi"),
-				tr("There are unlocked lines in this session, These will be discarded"),
-				QMessageBox::Ok | QMessageBox::Cancel);
+	return true;
+	//if(!data->linesAreLocked())
+	//{
+		//int ret = QMessageBox::question(this, tr("Hi"),
+				//tr("There are unlocked lines in this session, These will be discarded"),
+				//QMessageBox::Ok | QMessageBox::Cancel);
 
-		if(ret == QMessageBox::Ok)
-			return true;
-		else
-			return false;
-	}
-	else
-	{
-		return true;
-	}
+		//if(ret == QMessageBox::Ok)
+			//return true;
+		//else
+			//return false;
+	//}
+	//else
+	//{
+		//return true;
+	//}
 }
 
 
@@ -119,11 +158,16 @@ void MainWindow::removeLinePressed()
 void MainWindow::addLinePressed()
 {
 	Line * line = Line::NewLine(data->getVTKImage(), 
-			Line::getTypeEnum(valveGroup->checkedId()));
+			Line::getTypeEnum(lineTypeCombo->currentIndex()));
 	data->addLine(line);
+	data->propagateLine(line->getType());
+	imageViewer->showAllLines();
 	imageViewer->updateImage();
 	lineList->updateLines();
 }
+
+
+
 
 
 
@@ -143,14 +187,17 @@ QPushButton * MainWindow::getCheckedValveButton()
 // ------------------------------------------------------------------------
 void MainWindow::imageSelectionChanged()
 {
-	if(data == NULL) return;
+	if(data == NULL)
+	{
+		std::cout << "Test" << std::endl;
+		return;
+	}
 
 	data->setViewedImage(imageList->selectedIndex());
 	updateSliders();
 	data->setViewedTimeStep(tSlider->value());
 	data->setViewedSlice(zSlider->value());
 	updateAll(true);
-
 }
 
 
@@ -253,10 +300,7 @@ void MainWindow::loadActionPressed()
 
 	QString fileName = getLoadFile();
 
-	DataContainer * data = IO::Load(fileName.toStdString());
-	if(data != NULL)
-		initialiseFromData(data);
-
+	loadData(fileName.toStdString());
 }
 
 
@@ -323,10 +367,9 @@ void MainWindow::initialiseFromData(DataContainer * data)
 	
 	imageViewer->setData(this->data);
 	lineList->setData(this->data);
-	imageList->showList(this->data);
+	imageList->setData(this->data);
 	
 	imageViewer->updateImage(true);
-	lineList->updateLines();
 
 }
 

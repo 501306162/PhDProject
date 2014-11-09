@@ -22,7 +22,7 @@ void LineList::setUpTable()
 {
 	QStringList headers;
 	headers << "Type";
-	headers << "Locked";
+	headers << "Image Type";
 
 	this->table->setColumnCount(2);
 	this->table->setHorizontalHeaderLabels(headers);
@@ -81,16 +81,12 @@ void LineList::updateLines()
 		QString type = QString::fromStdString( Line::getTypeString(line->getType()) );
 
 		QTableWidgetItem *item1 = new QTableWidgetItem(type);
+		item1->setFlags(item1->flags() ^ Qt::ItemIsEditable);
 		table->setItem(count,0,item1);
 
-				
 
-		QString lockedVal = "Unlocked";
-		if(line->isLocked())
-			lockedVal = "Locked";
-	
-
-		QTableWidgetItem *item2 = new QTableWidgetItem(lockedVal);
+		QTableWidgetItem *item2 = new QTableWidgetItem("None");
+		item2->setFlags(item1->flags());
 		table->setItem(count,1,item2);
 
 		currentLines.push_back(line);
@@ -100,8 +96,7 @@ void LineList::updateLines()
 
 	if(currentIndex >= 0 && currentIndex < (int) currentLines.size())
 	{
-		QTableWidgetItem * item = table->item(currentIndex, 0);
-		table->setItemSelected(item,true);
+		table->setRangeSelected(QTableWidgetSelectionRange(currentIndex,0,currentIndex,1), true);
 	}
 
 }

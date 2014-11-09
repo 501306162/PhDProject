@@ -1,34 +1,91 @@
 #include "image_list.h"
 
-#include <QListWidgetItem>
+#include <QtGui>
 
 // ------------------------------------------------------------------------
 ImageListDisplay::ImageListDisplay(DataContainer *imageData)
 {
-	imageList = new QListWidget;
-	showList(imageData);
+	imageList = new QTableWidget;
+
+	QStringList headers;
+	headers << "Name";
+	headers << "Image Type";
+
+	imageList->setColumnCount(2);
+	imageList->setHorizontalHeaderLabels(headers);
+	imageList->setShowGrid(false);
+	imageList->setMinimumHeight(200);
+	imageList->resizeColumnToContents(0);
+
+
+	QHeaderView * view = imageList->horizontalHeader();
+	view->setResizeMode(QHeaderView::ResizeToContents);
+
+	QHeaderView * rowView = imageList->verticalHeader();
+	rowView->setDefaultSectionSize(rowView->fontMetrics().height()+6);
+
+
+	imageList->setSelectionBehavior(QAbstractItemView::SelectRows);
+	imageList->setSelectionMode(QAbstractItemView::SingleSelection);
+
+
+	setData(imageData);
+
+
 }
 
 
 // ------------------------------------------------------------------------
-void ImageListDisplay::showList(DataContainer * imageData)
+void ImageListDisplay::setSelection(unsigned int row)
 {
-	if(imageData == NULL)
+	this->imageList->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1), true);
+}
+
+
+// ------------------------------------------------------------------------
+void ImageListDisplay::setData(DataContainer * data)
+{
+	this->data = data;
+	showList();
+	setSelection(0);
+}
+
+
+// ------------------------------------------------------------------------
+void ImageListDisplay::showList()
+{
+	if(data == NULL)
 		return;
 
-	for(unsigned int i = 0; i < imageData->numImages(); i++)
+
+	this->imageList->clear();
+
+	this->imageList->setRowCount(data->numImages());
+
+	for(unsigned int i = 0; i < data->numImages(); i++)
 	{
-		std::cout << imageData->filename(i) << std::endl;
-		new QListWidgetItem(
-				QString::fromStdString(imageData->filename(i)),
-				this->imageList);
+		std::cout << data->filename(i) << std::endl;
+		QTableWidgetItem * item1 = new QTableWidgetItem(
+				QString::fromStdString(data->filename(i)));
+
+		QFont font = item1->font();
+		font.setPointSize(10);
+		item1->setFont(font);
+
+		QTableWidgetItem * item2 = new QTableWidgetItem(
+				QString::fromStdString(data->imageTypeString(i)));
+		item2->setFont(font);
+
+
+		this->imageList->setItem(i,0, item1);
+		this->imageList->setItem(i,1, item2);
+		
 		
 	}
 
 
 	// set the selection procedure
-	this->imageList->setSelectionMode(QAbstractItemView::SingleSelection);
-	this->imageList->setItemSelected(this->imageList->item(0), true);
+	//this->imageList->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 // ------------------------------------------------------------------------

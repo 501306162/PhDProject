@@ -19,6 +19,8 @@ Line::Line()
 }
 
 
+
+
 // ------------------------------------------------------------------------
 Line * Line::copy()
 {
@@ -37,13 +39,13 @@ Line * Line::copy()
 	line->actor->GetProperty()->SetLineWidth(2.0);
 	line->actor->GetProperty()->SetPointSize(5.0);
 	line->actor->GetProperty()->SetRepresentationToWireframe();
+	line->type = type;
 
 	double col[3];
 	line->getColour(col);
 	line->actor->GetProperty()->SetColor(col);
 
 
-	line->type = type;
 
 	return line;
 }

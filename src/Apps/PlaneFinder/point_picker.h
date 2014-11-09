@@ -55,6 +55,9 @@ private:
 	int pickedPoint;
 	vtkPolyData * pickedData;
 
+
+	double pickTolerance;
+
 };
 
 

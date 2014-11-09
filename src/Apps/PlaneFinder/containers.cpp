@@ -4,6 +4,41 @@
 
 #include <QFileInfo>
 
+
+// ------------------------------------------------------------------------
+DataContainer::DataContainer()
+{
+	saveName = "";
+}
+
+
+// ------------------------------------------------------------------------
+bool DataContainer::hasSaveName()
+{
+	if(saveName.empty())
+		return false;
+	return true;
+}
+
+// ------------------------------------------------------------------------
+DataInstance::ImageType DataContainer::imageType(unsigned int index)
+{
+	return data[index].imageType;
+}
+
+// ------------------------------------------------------------------------
+std::string DataContainer::imageTypeString(unsigned int index)
+{
+	return data[index].getImageTypeString();
+}
+
+// ------------------------------------------------------------------------
+void DataContainer::setImageType(unsigned int index, const std::string &type)
+{
+	data[index].imageType = DataInstance::getType(type);
+}
+
+
 // ------------------------------------------------------------------------
 void DataContainer::LoadData(const std::string & folder)
 {
@@ -102,7 +137,17 @@ Line::Map DataContainer::getLineData()
 void DataContainer::removeLine(Line::Type lineType)
 {
 	DataHolder & holder = getCurrentHolder();
-	holder.lines.erase(lineType);
+	Line * line = holder.lines[lineType];
+
+	// loop through all timesteps of this sequence 
+	DataInstance &sequence = this->data[currentIndex];
+	for(unsigned int i = 0; i < sequence.images.size(); i++)
+	{
+		Line::Map &lmap = sequence.images[i][currentSlice].lines;
+		
+		if(lmap.count(line->getType()) > 0)
+			lmap.erase(line->getType());
+	}
 }
 
 // ------------------------------------------------------------------------

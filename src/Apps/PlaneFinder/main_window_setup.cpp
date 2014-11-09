@@ -38,6 +38,10 @@ void MainWindow::createActions()
 	saveAction->setToolTip("Save the current session");
 	fileMenu->addAction(saveAction);
 
+	saveAsAction = new QAction(tr("&Save As"), this);
+	saveAsAction->setShortcut(QKeySequence::SaveAs);
+	saveAsAction->setToolTip("Save the current Session as");
+	fileMenu->addAction(saveAsAction);
 		
 	
 }
@@ -75,11 +79,13 @@ void MainWindow::setUpSignals()
 	connect(this->controls, SIGNAL(leftPressed()), this, SLOT(tSliderLeft()));
 	connect(this->controls, SIGNAL(lockPressed()), this, SLOT(lockLine()));
 	connect(this->controls, SIGNAL(propagatePressed()), this, SLOT(propagateLinePressed()));
+	connect(this->imageTypeButton, SIGNAL(pressed()), this, SLOT(imageTypePressed()));
 
 	// connect the load and save 
 	connect(this->saveAction, SIGNAL(triggered()), this, SLOT(saveActionPressed()));
 	connect(this->newAction, SIGNAL(triggered()), this, SLOT(newActionPressed()));
 	connect(this->loadAction, SIGNAL(triggered()), this, SLOT(loadActionPressed()));
+	connect(this->saveAsAction, SIGNAL(triggered()), this, SLOT(saveAsActionPressed()));
 }
 
 
@@ -142,11 +148,12 @@ QWidget * MainWindow::createLayout()
 	QWidget * viewWidget = createImageViewer();
 
 	leftLayout->addWidget(createImageList());
+	leftLayout->addWidget(createImageTypeControls());
 	leftLayout->addWidget(createLineList());
 	leftLayout->addWidget(createImageControls());
 	leftLayout->addWidget(createButtonGroup());
 	leftWidget->setLayout(leftLayout);
-	leftWidget->setMaximumWidth(300);
+	leftWidget->setMaximumWidth(400);
 
 
 	QWidget * rightWidget = new QWidget(this);
@@ -168,6 +175,26 @@ QWidget * MainWindow::createLayout()
 
 }
 
+// ------------------------------------------------------------------------
+QWidget * MainWindow::createImageTypeControls()
+{
+	QWidget * widget = new QWidget(this);
+	QHBoxLayout * layout = new QHBoxLayout;
+
+	imageTypeCombo = new QComboBox(this);
+	imageTypeCombo->addItems(DataInstance::getTypes());
+	layout->addWidget(imageTypeCombo);
+
+	imageTypeButton = new QPushButton("Apply", this);
+	layout->addWidget(imageTypeButton);
+
+	widget->setLayout(layout);
+
+	return widget;
+
+
+}
+
 
 // ------------------------------------------------------------------------
 QWidget * MainWindow::createButtonGroup()
@@ -178,6 +205,12 @@ QWidget * MainWindow::createButtonGroup()
 	lockLineButton = new QPushButton("Lock Line", this);
 	removeLineButton = new QPushButton("Remove Line", this);
 	
+	lineTypeCombo = new QComboBox(this);
+	lineTypeCombo->addItem("Mitral Valve");
+	lineTypeCombo->addItem("Tricuspid Valve");
+	lineTypeCombo->addItem("Aortic Valve");
+
+
 	mvButton = new QPushButton("Mitral Valve", this);
 	tpButton = new QPushButton("Tricuspid Valve", this);
 	avButton = new QPushButton("Auortic Valve", this);
@@ -187,28 +220,32 @@ QWidget * MainWindow::createButtonGroup()
 
 	mvButton->setChecked(true);
 
+	/*
 	valveGroup = new QButtonGroup(this);
+	
 	valveGroup->addButton(mvButton,0);
 	valveGroup->addButton(tpButton,1);
 	valveGroup->addButton(avButton,2);
 	valveGroup->setExclusive(true);
+	*/
 
 
 	QVBoxLayout * layout = new QVBoxLayout;
 	layout->addWidget(addLineButton);
+	layout->addWidget(lineTypeCombo);
 	layout->addWidget(propagateLineButton);
 	layout->addWidget(lockLineButton);
 	layout->addWidget(removeLineButton);
 
-	QFrame * line = new QFrame(this);
-	line->setFrameShape(QFrame::HLine);
-	line->setFrameShadow(QFrame::Sunken);
-	layout->addWidget(line);
+	//QFrame * line = new QFrame(this);
+	//line->setFrameShape(QFrame::HLine);
+	//line->setFrameShadow(QFrame::Sunken);
+	//layout->addWidget(line);
 
 
-	layout->addWidget(mvButton);
-	layout->addWidget(tpButton);
-	layout->addWidget(avButton);
+	//layout->addWidget(mvButton);
+	//layout->addWidget(tpButton);
+	//layout->addWidget(avButton);
 	
 	buttonBox->setLayout(layout);
 	return buttonBox;

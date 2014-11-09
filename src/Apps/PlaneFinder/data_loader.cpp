@@ -173,6 +173,8 @@ void DataLoader::GetFilenames(FilenamesType &filenames)
 	//this->filters << "*.nrrd";
 	QStringList files = dir.entryList(this->filters, QDir::Files);
 
+	std::cout << folderName << std::endl;
+
 	for(int i = 0; i < files.size(); i++)
 	{
 		QString qfullPath = dir.absoluteFilePath(files[i]);

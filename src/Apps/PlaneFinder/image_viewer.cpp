@@ -36,22 +36,24 @@ void ImageViewer::updateImage(bool reset)
 
 	for(unsigned int i = 0; i < displayedLines.size(); i++)
 	{
-		std::cout << displayedLines.size() << std::endl;
+		displayedLines[i]->SetPosition(0,0,0.1);
 		renderer->AddActor(displayedLines[i]);
 	}
 
 	renderer->AddActor(data->getActor());
 	
-	if(reset) resetCamera();
 	style->SetRenderer(renderer);
 	style->SetData(&data->getCurrentHolder());
 	style->SetRenderWindow(widget->GetRenderWindow());
+	if(reset) resetCamera();
 	widget->GetRenderWindow()->Render();
+	
 }
 
 // ------------------------------------------------------------------------
 void ImageViewer::resetCamera()
 {
+	std::cout << "Reseting camera" << std::endl;
 	renderer->ResetCamera();
 }
 
@@ -65,9 +67,15 @@ void ImageViewer::showAllLines()
 // ------------------------------------------------------------------------
 void ImageViewer::setLineToDisplay(Line::Type type)
 {
+
+	displayedLines = data->getLines();
+	return;
+
 	displayedLines.clear();
 	if(data->getLineData().count(type) > 0)
+	{
 		displayedLines.push_back(data->getLineData()[type]->getActor());
+	}
 }
 
 

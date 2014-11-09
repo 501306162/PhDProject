@@ -36,11 +36,11 @@ bool IO::loadData()
 
 	QTextStream in(&file);
 	QJson::Parser parser;
-
 	QVariantMap json = parser.parse(in.device()).toMap();
 
 	std::string folderName = json["folder"].toString().toStdString();
 	data->LoadData(folderName);
+	data->setSaveName(filename);
 	loadImages(json);
 
 
@@ -55,6 +55,8 @@ void IO::loadImages(QVariantMap &input)
 	for(int i = 0; i < images.size(); i++)
 	{
 		QVariantMap imageData = images[i].toMap();
+		QString type = imageData["image_type"].toString();
+		data->setImageType(i, type.toStdString());
 
 		QVariantList lines = imageData["lines"].toList();
 		loadLines(lines, imageData["name"].toString().toStdString());
@@ -102,12 +104,12 @@ void IO::makeLine(QVariantMap &line, const std::string &imageName, Line::Type ty
 	QVariantMap p1map = line["p1"].toMap();
 	p1[0] = p1map["x"].toDouble();
 	p1[1] = p1map["y"].toDouble();
-	p1[2] = p1map["z"].toDouble();
+	p1[2] = p1map["z"].toDouble();// + 1.0;
 
 	QVariantMap p2map = line["p2"].toMap();
 	p2[0] = p2map["x"].toDouble();
 	p2[1] = p2map["y"].toDouble();
-	p2[2] = p2map["z"].toDouble();
+	p2[2] = p2map["z"].toDouble(); // + 1.0;
 
 
 	Line * lineOb = Line::NewLine(type, p1, p2);
@@ -119,6 +121,7 @@ void IO::makeLine(QVariantMap &line, const std::string &imageName, Line::Type ty
 bool IO::Save(const std::string &filename, DataContainer * data)
 {
 	IO io(filename, data);
+	data->setSaveName(filename);
 	io.buildData();
 	
 
@@ -169,6 +172,7 @@ void IO::buildImageData(unsigned int index, QVariantMap &dmap)
 {
 	DataInstance & instance = data->getInstance(index);
 	dmap.insert("name", QString::fromStdString(instance.filename));
+	dmap.insert("image_type", QString::fromStdString(instance.getImageTypeString()));
 	QVariantList seqList;
 	for(unsigned int i = 0; i < instance.images.size(); i++)
 	{

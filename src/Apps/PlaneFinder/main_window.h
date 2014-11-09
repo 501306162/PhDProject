@@ -23,6 +23,8 @@ public:
 
 	virtual ~MainWindow();
 
+	void loadData(const std::string &filename);
+	void saveData(const std::string &filename);
 
 
 protected:
@@ -42,6 +44,9 @@ protected slots:
 	void saveActionPressed();
 	void newActionPressed();
 	void loadActionPressed();
+	void saveAsActionPressed();
+	void imageTypePressed();
+
 
 
 
@@ -70,6 +75,7 @@ private:
 	QWidget * createLayout();
 
 	QWidget * createImageList();
+	QWidget * createImageTypeControls();
 	void setImageList();
 	
 
@@ -96,6 +102,7 @@ private:
 	QAction * loadAction;
 	QAction * newAction;
 	QAction * saveAction;
+	QAction * saveAsAction;
 
 
 	// set of buttons 
@@ -103,10 +110,15 @@ private:
 	QPushButton * tpButton;
 	QPushButton * avButton;
 
+	QComboBox * lineTypeCombo;
+
 	QPushButton * addLineButton;
 	QPushButton * removeLineButton;
 	QPushButton * propagateLineButton;
 	QPushButton * lockLineButton;
+
+	QComboBox * imageTypeCombo;
+	QPushButton * imageTypeButton;
 
 
 	// sliders 
