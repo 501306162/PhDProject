@@ -1,5 +1,6 @@
 set( sources "main.cpp"
 	"SeriesExtractor.cpp"
+	"VolumeGrouper.cpp"
 	"MainWindow.cpp" )
 
 set(qt_headers "MainWindow.h")

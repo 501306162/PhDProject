@@ -19,7 +19,7 @@ ImageListDisplay::ImageListDisplay(DataContainer *imageData)
 
 
 	QHeaderView * view = imageList->horizontalHeader();
-	view->setResizeMode(QHeaderView::ResizeToContents);
+	view->setResizeMode(QHeaderView::Stretch);
 
 	QHeaderView * rowView = imageList->verticalHeader();
 	rowView->setDefaultSectionSize(rowView->fontMetrics().height()+6);

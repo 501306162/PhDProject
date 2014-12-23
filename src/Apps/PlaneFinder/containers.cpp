@@ -44,7 +44,7 @@ void DataContainer::LoadData(const std::string & folder)
 {
 	DataLoader loader;
 	loader.SetDataFolder(folder);
-	loader.AddFilenameFilter("image*");
+	loader.AddFilenameFilter("*.nrrd");
 	loader.LoadData(data);
 
 	currentIndex = 0;

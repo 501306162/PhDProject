@@ -44,7 +44,7 @@ typedef std::vector<VolumeData> SequenceData;
 typedef struct data_instance_
 {
 
-	enum ImageType { UNKNOWN, T2C, T3C, T4C };
+	enum ImageType { UNKNOWN, T2C, T3C, T4C, TR2C, TR3C, TRVOT, TLVOT };
 
 	static QStringList getTypes()
 	{
@@ -52,6 +52,10 @@ typedef struct data_instance_
 		types << "2C";
 		types << "3C";
 		types << "4C";
+		types << "R2C";
+		types << "R3C";
+		types << "RVOT";
+		types << "LVOT";
 
 		return types;
 	}
@@ -64,6 +68,14 @@ typedef struct data_instance_
 			return T3C;
 		else if (name  == "4C")
 			return T4C;
+		else if (name == "R3C")
+			return TR3C;
+		else if (name == "R2C")
+			return TR2C;
+		else if (name == "RVOT")
+			return TRVOT;
+		else if (name == "LVOT")
+			return TLVOT;
 		else
 			return UNKNOWN;
 	}
@@ -82,6 +94,18 @@ typedef struct data_instance_
 				break;
 			case T4C:
 				return "4C";
+				break;
+			case TR2C:
+				return "R2C";
+				break;
+			case TR3C:
+				return "R3C";
+				break;
+			case TLVOT:
+				return "LVOT";
+				break;
+			case TRVOT:
+				return "RVOT";
 				break;
 			default:
 				return "Unknown";

@@ -19,7 +19,7 @@ public:
 	
 	void removeEntrys();
 	void setUpTable();
-	unsigned int getSelectedLineIndex();
+	int getSelectedLineIndex();
 	bool lineSelected();
 
 	Line::Type getSelectedLineType();

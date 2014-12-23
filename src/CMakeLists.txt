@@ -40,6 +40,7 @@ include_directories("${gtest_SOURCE_DIR}/include")
 set(SRC_SUBDIRS 
 	"MRFLib"
 	"Utils"
+	"ValveTracking"
 	"Filters"
 	"Manifold"
 	"Apps"

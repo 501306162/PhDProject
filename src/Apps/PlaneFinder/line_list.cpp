@@ -54,7 +54,7 @@ bool LineList::lineSelected()
 
 
 // ------------------------------------------------------------------------
-unsigned int LineList::getSelectedLineIndex()
+int LineList::getSelectedLineIndex()
 {
 	if(!lineSelected())
 		return -1;

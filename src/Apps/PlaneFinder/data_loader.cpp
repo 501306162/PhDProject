@@ -141,6 +141,7 @@ void DataLoader::LoadImage(const std::string &filename, DataInstance &image)
 			DataHolder data;
 			data.vtkImage = vtkSmartPointer<vtkImageData>::New();
 			data.vtkImage->DeepCopy(vtkFilter->GetOutput());
+			data.vtkImage->Print(std::cout);
 			data.itkImage = roiFilter->GetOutput();
 			data.timestep = i;
 			data.slice = j;
@@ -173,7 +174,6 @@ void DataLoader::GetFilenames(FilenamesType &filenames)
 	//this->filters << "*.nrrd";
 	QStringList files = dir.entryList(this->filters, QDir::Files);
 
-	std::cout << folderName << std::endl;
 
 	for(int i = 0; i < files.size(); i++)
 	{

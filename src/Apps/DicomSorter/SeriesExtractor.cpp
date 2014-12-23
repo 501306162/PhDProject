@@ -47,6 +47,12 @@ void SeriesExtractor::SetDescriptionFilters(const std::vector<std::string> &filt
 
 
 // ------------------------------------------------------------------------
+DicomSeriesList SeriesExtractor::GetOutput() const
+{
+	return m_Series;
+}
+
+// ------------------------------------------------------------------------
 bool SeriesExtractor::ExtractSeries()
 {
 	if(!InitialCheck())
@@ -182,13 +188,14 @@ DicomImage SeriesExtractor::BuildDicomImage(const std::string &filename, const g
 	image.seriesDescription = mappings.at(seriesDescription);
 	image.seriesNumber = ConvertInt(mappings.at(seriesNumber));
 	image.imageNumber = ConvertInt(mappings.at(instanceNumber));
-	image.sliceThickness = ConvertDouble(mappings.at(sliceThickness));
+
+	//image.sliceThickness = ConvertDouble(mappings.at(sliceThickness));
 	image.rows = ConvertInt(mappings.at(rows));
 	image.cols = ConvertInt(mappings.at(cols));
-	image.triggerTime = ConvertDouble(mappings.at(triggerTime));
-	image.sliceLocation = ConvertDouble(mappings.at(sliceLocation));
-	image.imagePosition = ConvertDoubleArray(mappings.at(imagePosition));
-	image.imageOrientation = ConvertDoubleArray(mappings.at(imageOrientation));
+	//image.triggerTime = ConvertDouble(mappings.at(triggerTime));
+	//image.sliceLocation = ConvertDouble(mappings.at(sliceLocation));
+	//image.imagePosition = ConvertDoubleArray(mappings.at(imagePosition));
+	//image.imageOrientation = ConvertDoubleArray(mappings.at(imageOrientation));
 	image.filename = filename;
 
 	return image;

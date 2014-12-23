@@ -7,6 +7,7 @@ set(APPS
 	"SegmentationGenerator"
 	"PlaneFinder"
 	"iresisd-1.1"
+	"ValveTracking"
 	"DicomSorter")
 
 # ----------------------------------------------------------------------

@@ -5,10 +5,20 @@
 #include "common.h"
 #include "main_window.h"
 #include "containers.h"
+#include "dicom_parser.h"
 
 int main(int argc, char ** argv)
 {
 	QApplication app(argc, argv);
+	/*
+	DicomParser * parser = new DicomParser;
+
+
+	parser->setFolderName(QString::fromStdString(argv[1]));
+	parser->setUpDisplay();
+	parser->show();
+	*/
+
 	MainWindow * window;
 
 	if (argc == 3)

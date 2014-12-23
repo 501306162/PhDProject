@@ -17,6 +17,9 @@
 
 #include "common.h"
 
+#include "containers.h"
+
+
 class PointPicker : public vtkInteractorStyleImage 
 {
 public:
@@ -32,11 +35,13 @@ public:
 	void SetRenderWindow(vtkRenderWindow * window) { this->window = window; }
 	void SetData(DataHolder * data) { this->data = data; }
 	void SetPickedData(vtkPolyData * data) { pickedData = data; }
+	void SetDataContainer(DataContainer * data) { dataContainer = data; }
 	
 
 private:
 	vtkRenderer * currentRenderer;
 	DataHolder * data;
+	DataContainer *dataContainer;
 
 	bool PointAtPickLocation();
    	void SetPointLocation();	

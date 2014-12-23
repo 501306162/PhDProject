@@ -25,6 +25,7 @@ public:
 
 	void loadData(const std::string &filename);
 	void saveData(const std::string &filename);
+	void createNewSession(const std::string &folderName);
 
 
 protected:
@@ -32,6 +33,9 @@ protected:
 	void setTimeStep(unsigned int currentSelection);
 
 protected slots:
+	void exportVideosPressed();
+	void dicomParsed(QString &folder);
+	void processDicomPressed();
 	void imageSelectionChanged();
 	void sliderSelectionChanged();
 	void addLinePressed();
@@ -103,6 +107,9 @@ private:
 	QAction * newAction;
 	QAction * saveAction;
 	QAction * saveAsAction;
+	QAction * processDicomAction;
+	QAction * patchExtractorAction;
+	QAction * exportVideos;
 
 
 	// set of buttons 

@@ -90,6 +90,11 @@ void IO::loadLines(QVariantList &lines, const std::string &imageName)
 			QVariantMap lmap = line["AV"].toMap();
 			makeLine(lmap, imageName, Line::AV, timeStep, slice);			
 		}
+		if(line.contains("PV"))
+		{
+			QVariantMap lmap = line["PV"].toMap();
+			makeLine(lmap, imageName, Line::PV, timeStep, slice);			
+		}
 
 	}
 }

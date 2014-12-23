@@ -42,7 +42,21 @@ void MainWindow::createActions()
 	saveAsAction->setShortcut(QKeySequence::SaveAs);
 	saveAsAction->setToolTip("Save the current Session as");
 	fileMenu->addAction(saveAsAction);
+	fileMenu->addSeparator();
 		
+	processDicomAction = new QAction(tr("Process Dicom"), this);
+	processDicomAction->setShortcut(QKeySequence::Print);
+	processDicomAction->setToolTip("Process a dicom examination");
+	fileMenu->addAction(processDicomAction);
+
+
+	patchExtractorAction = new QAction(tr("Extract Patches"), this);
+	patchExtractorAction->setToolTip("Extract the patches");
+	fileMenu->addAction(patchExtractorAction);
+
+
+	exportVideos = new QAction(tr("Extract Videos"), this);
+	fileMenu->addAction(exportVideos);
 	
 }
 
@@ -86,6 +100,8 @@ void MainWindow::setUpSignals()
 	connect(this->newAction, SIGNAL(triggered()), this, SLOT(newActionPressed()));
 	connect(this->loadAction, SIGNAL(triggered()), this, SLOT(loadActionPressed()));
 	connect(this->saveAsAction, SIGNAL(triggered()), this, SLOT(saveAsActionPressed()));
+	connect(this->processDicomAction, SIGNAL(triggered()), this, SLOT(processDicomPressed()));
+	connect(this->exportVideos, SIGNAL(triggered()), this, SLOT(exportVideosPressed()));
 }
 
 
@@ -209,6 +225,7 @@ QWidget * MainWindow::createButtonGroup()
 	lineTypeCombo->addItem("Mitral Valve");
 	lineTypeCombo->addItem("Tricuspid Valve");
 	lineTypeCombo->addItem("Aortic Valve");
+	lineTypeCombo->addItem("Pulmanary Valve");
 
 
 	mvButton = new QPushButton("Mitral Valve", this);

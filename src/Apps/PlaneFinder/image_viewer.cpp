@@ -45,6 +45,7 @@ void ImageViewer::updateImage(bool reset)
 	style->SetRenderer(renderer);
 	style->SetData(&data->getCurrentHolder());
 	style->SetRenderWindow(widget->GetRenderWindow());
+	style->SetDataContainer(data);
 	if(reset) resetCamera();
 	widget->GetRenderWindow()->Render();
 	

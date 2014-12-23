@@ -31,6 +31,7 @@ public:
 	FilenamesType GetOutput() const;
 
 
+
 	static FilenamesType Read(const std::string &input, bool checkFiles=false);
 
 protected:

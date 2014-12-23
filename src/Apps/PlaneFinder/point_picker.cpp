@@ -75,6 +75,9 @@ void PointPicker::OnLeftButtonDown()
 // ------------------------------------------------------------------------
 void PointPicker::SetPointLocation()
 {
+
+	int shifted = this->GetInteractor()->GetShiftKey();
+
 	int * clickPos = this->GetInteractor()->GetEventPosition();
 	std::cout << clickPos[0] << " " << clickPos[1] << " " << clickPos[2] << std::endl;
 

@@ -3,6 +3,9 @@
 #include <QtCore>
 #include "io.h"
 
+#include "dicom_parser.h"
+#include "image_exporter.h"
+
 // ------------------------------------------------------------------------
 void MainWindow::saveActionPressed()
 {
@@ -25,6 +28,56 @@ void MainWindow::saveData(const std::string &filename)
 		std::cout << "File couldn't be saved" << std::endl;
 	}
 }
+
+
+// ------------------------------------------------------------------------
+void MainWindow::exportVideosPressed()
+{
+	if(data == NULL) return;
+
+	QString folder = QFileDialog::getExistingDirectory(this, "Folder", "/Users/oliverferoze/Uni/Data");
+	if(folder.isEmpty()) return;
+	
+	ImageExporter exporter;
+	exporter.setData(this->data);
+	exporter.setFolder(folder.toStdString());
+	exporter.exportImages();
+
+}
+
+
+
+// ------------------------------------------------------------------------
+void MainWindow::processDicomPressed()
+{
+	if(data != NULL)
+	{
+		saveActionPressed();
+	}
+
+	QString dicomDir = QFileDialog::getExistingDirectory(this, "Choose the dicom directory",
+			"/Users/oliverferoze/Uni/Data/ValveTracking/Dicom");
+	
+	if(dicomDir.isEmpty())
+		return;
+
+	DicomParser * parser = new DicomParser;
+	parser->setFolderName(dicomDir);
+	parser->setUpDisplay();
+	
+	connect(parser, SIGNAL(saveDone(QString&)), this, SLOT(dicomParsed(QString&)));
+	
+	parser->show();
+
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::dicomParsed(QString &folder)
+{
+	disconnect(this, SLOT(dicomParsed(QString&)));
+	createNewSession(folder.toStdString());
+}
+
 
 // ------------------------------------------------------------------------
 void MainWindow::saveAsActionPressed()
@@ -96,11 +149,31 @@ bool MainWindow::okToSave()
 // ------------------------------------------------------------------------
 void MainWindow::tSliderRight()
 {
+
+	//Qt::KeyboardModifier = QApplication:
+	Qt::KeyboardModifiers modifiers = QApplication::queryKeyboardModifiers();
+
+	if(modifiers.testFlag(Qt::ShiftModifier))
+	{
+		if(lineList->getSelectedLineIndex() != -1)
+		{
+			Line::Type type = lineList->getSelectedLineType();
+			data->propagateLine(type);
+		}
+		
+	}
+
+
+
 	int val = tSlider->value();
-	if(val == tSlider->maximum()) 
+	if(val == tSlider->maximum() && (!modifiers.testFlag(Qt::ShiftModifier))) 
 		tSlider->setValue(tSlider->minimum());
 	else
 		tSlider->setValue(val+1);
+
+
+	
+
 }
 
 // ------------------------------------------------------------------------
@@ -285,8 +358,14 @@ void MainWindow::newActionPressed()
 	// delete old data 
 	delete data;
 
+	createNewSession(fileName.toStdString());
+}
+
+// ------------------------------------------------------------------------
+void MainWindow::createNewSession(const std::string &folderName)
+{
 	DataContainer * newData = new DataContainer;
-	newData->LoadData(fileName.toStdString());
+	newData->LoadData(folderName);
 	initialiseFromData(newData);
 }
 

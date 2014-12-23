@@ -15,7 +15,7 @@ public:
 	typedef std::vector<Line*> List;
 	
 
-	enum Type { MV, TP, AV };
+	enum Type { MV, TP, AV, PV };
 	
 	typedef std::map<Type, Line*> Map;
 

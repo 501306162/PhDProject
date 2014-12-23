@@ -185,6 +185,9 @@ Line::Type Line::getTypeEnum(unsigned int btnIndex)
 		case 2:
 			return Line::AV;
 			break;
+		case 3:
+			return Line::PV;
+			break;
 		default:
 			return Line::MV;
 			break;
@@ -204,6 +207,9 @@ std::string Line::getTypeString(Type type)
 			break;
 		case AV:
 			return "AV";
+			break;
+		case PV:
+			return "PV";
 			break;
 		default:
 			return "";
@@ -226,6 +232,10 @@ void Line::getColour(double * col)
 			break;
 		case AV:
 			col[2] = 1.0;
+			break;
+		case PV:
+			col[0] = 1.0;
+			col[1] = 1.0;
 			break;
 		default:
 			break;

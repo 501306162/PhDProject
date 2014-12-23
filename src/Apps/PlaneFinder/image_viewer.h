@@ -1,6 +1,7 @@
 #ifndef IMAGE_VIEWER_H
 #define IMAGE_VIEWER_H
 
+
 #include "common.h"
 
 #include <QVTKWidget.h>
@@ -13,6 +14,7 @@
 #include <vtkRenderer.h>
 
 #include "point_picker.h"
+
 #include "containers.h"
 
 class ImageViewer 

@@ -8,11 +8,15 @@ set(lib_name "Utils")
 # Get the sources for the library
 set(lib_srcs 
 	"FilenamesReader.cpp"
+	"Directory.cpp"
    	"MatrixIO.cpp"
 	"VonMisesDistribution.cpp"
+	"CardiacDicomExtractor.cpp"
 	"PatientData.cpp"
 	"MatrixWriter.cpp"
 	"MatrixReader.cpp"
+	"DicomParser.cpp"
+	"SeriesExtractor.cpp"
 	"RegistrationHelpers.cpp")
 
 
@@ -20,16 +24,20 @@ set(lib_srcs
 # Get the headers for the install include folder
 set(lib_headers 
 	"Helpers.h"
+	"Directory.h"
 	"Helpers.hpp"
 	"ImageIO.h"
+	"CardiacDicomExtractor.h"
 	"VonMisesDistribution.h"
 	"ImageIO.hpp"
 	"FilenamesReader.h"
 	"Knn.h"
 	"Knn.hpp"
+	"SeriesExtractor.h"
 	"PatientData.h"
 	"MatrixIO.h"
 	"MatrixWriter.h"
+	"DicomParser.h"
 	"MatrixReader.h"
 	"MatrixCommon.h"
 	"RegistrationHelpers.h")
