@@ -30,7 +30,7 @@ int main(int argc, char ** argv)
 		inFilename = inFilename.replace(QString::fromStdString(argv[1]),"");
 		inFilename = inFilename.replace("/","");
 		inFilename = inFilename.replace(".json","");
-		std::cout << inFilename.toStdString() << std::endl;
+		//std::cout << inFilename.toStdString() << std::endl;
 
 
 		vt::JsonReader::Pointer reader = vt::JsonReader::New();
@@ -50,7 +50,7 @@ int main(int argc, char ** argv)
 			QDir outputDir(output);
 
 			QString outputPath = outputDir.absoluteFilePath(type);
-			std::cout << outputPath.toStdString() << std::endl;
+			//std::cout << outputPath.toStdString() << std::endl;
 
 			if(!outputDir.exists(outputPath))
 				outputDir.mkdir(outputPath);
@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
 			writer->SetFileName(fileName.toStdString());
 			writer->Write();
 
-			std::cout << lineIt->first << std::endl;
+			std::cout << fileName.toStdString() << " " << converter->GetOutput()->GetNumberOfLines() << std::endl;
 
 
 			++lineIt;
