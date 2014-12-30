@@ -2,8 +2,8 @@
 # Set of programs for testing
 set(APP_NAMES 
 	"InitTesting"
-	"MRFTest"
-	"DOGTest"
+	#"MRFTest"
+	#"DOGTest"
 	"PatientDataTest"
 	"DiffusionMapTest")
 

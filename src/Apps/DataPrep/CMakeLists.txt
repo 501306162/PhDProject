@@ -4,7 +4,7 @@ set(APP_NAMES
 	"AlignShapes"
 	"AlignImages"
 	"ResampleLabelImages"
-	"BuildManifoldShapeModel"
+	#"BuildManifoldShapeModel"
 	"LearnGMMs"
 	"ComputeDistanceMaps"
 	"VolumePointPicker"

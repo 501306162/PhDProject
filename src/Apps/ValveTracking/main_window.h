@@ -18,6 +18,7 @@
 #include <vtkImageSlice.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkActor2D.h>
 
 
 #include <ValveLine.h>
@@ -47,6 +48,7 @@ public:
 		vtkSmartPointer<vtkImageData> image;
 		vtkSmartPointer<vtkImageSliceMapper> imageMapper;
 		vtkSmartPointer<vtkImageSlice> imageActor;
+		vtkSmartPointer<vtkActor2D> labelActor;
 
 	} DisplayLine;
 

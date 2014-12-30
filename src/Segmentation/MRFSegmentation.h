@@ -2,6 +2,7 @@
 #define MRF_SEGMENTATION_H
 
 
+#include <itkProcessObject.h>
 #include <itkLinearInterpolateImageFunction.h>
 #include <itkImageToImageFilter.h>
 #include "MRFDataTermBase.h"

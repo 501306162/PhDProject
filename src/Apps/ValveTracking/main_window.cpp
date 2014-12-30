@@ -2,6 +2,9 @@
 
 #include <QtGui>
 #include <QtCore>
+#include <vtkTextActor3D.h>
+#include <vtkStringArray.h>
+#include <vtkLabelPlacementMapper.h>
 
 #include <qjson/parser.h>
 
@@ -9,6 +12,9 @@
 #include <vtkRenderWindow.h>
 #include <vtkImageProperty.h>
 #include <vtkInteractorStyleImage.h>
+#include <vtkPointData.h>
+#include <vtkPointSetToLabelHierarchy.h>
+#include <vtkLabelPlacementMapper.h>
 
 #include <CommonDefinitions.h>
 
@@ -224,8 +230,10 @@ void MainWindow::showImages(const unsigned int index)
 	this->renderer2->RemoveAllViewProps();
 	this->renderer1->AddActor(displayValves[0].imageActor);
 	this->renderer1->AddActor(displayValves[0].polyActor);
+	this->renderer1->AddActor(displayValves[0].labelActor);
 	this->renderer2->AddActor(line.imageActor);
 	this->renderer2->AddActor(line.polyActor);
+	this->renderer2->AddActor(line.labelActor);
 	this->renderer1->ResetCamera();
 	this->renderer2->SetActiveCamera(this->renderer1->GetActiveCamera());
 
@@ -363,9 +371,38 @@ void MainWindow::buildDisplayLine(const ValveSequence<3>::Pointer &valve, Displa
 	line.imageActor->GetProperty()->SetColorWindow(512.04);
 
 
+	vtkSmartPointer<vtkStringArray> labels = vtkSmartPointer<vtkStringArray>::New();
+	labels->SetNumberOfValues(2);
+	labels->SetName("labels");
+	labels->SetValue(0,"p1");
+	labels->SetValue(1,"p2");
+
+	vtkSmartPointer<vtkIntArray> sizes = vtkSmartPointer<vtkIntArray>::New();
+	sizes->SetNumberOfValues(2);
+	sizes->SetName("sizes");
+	sizes->SetValue(0, 4);
+	sizes->SetValue(1, 4);
+
+
+	line.poly = valve->GetValveLine(0)->GetPolyData();
+	line.poly->GetPointData()->AddArray(labels);
+	line.poly->GetPointData()->AddArray(sizes);
+
+	vtkSmartPointer<vtkPointSetToLabelHierarchy> pointPlacer = vtkSmartPointer<vtkPointSetToLabelHierarchy>::New();
+	pointPlacer->SetInputData(line.poly);
+	pointPlacer->SetLabelArrayName("labels");
+	pointPlacer->SetPriorityArrayName("sizes");
+	pointPlacer->Update();
+
+
+	vtkSmartPointer<vtkLabelPlacementMapper> labelMapper = vtkSmartPointer<
+		vtkLabelPlacementMapper>::New();
+	labelMapper->SetInputConnection(pointPlacer->GetOutputPort());
+	line.labelActor = vtkSmartPointer<vtkActor2D>::New();
+	line.labelActor->SetMapper(labelMapper);
+
 
 	// create the line
-	line.poly = valve->GetValveLine(0)->GetPolyData();
 	line.polyMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	line.polyMapper->SetInputData(line.poly);
 	line.polyActor = vtkSmartPointer<vtkActor>::New();

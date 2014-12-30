@@ -1,11 +1,12 @@
 set(APP_NAMES 
 	"ParseResults"
 	"ValveAlignment"
-	"FeatureTest"
+	#"FeatureTest"
 	"ROITest"
 	"ValveROIFinder"
 	"SortOutDicom"
-	"ModelTest"
+	#"ModelTest"
+	"ValveNameReplacer"
 	"SAStackBuilder")
 
 set(DataSorter_SRC "DataSorter.cpp")

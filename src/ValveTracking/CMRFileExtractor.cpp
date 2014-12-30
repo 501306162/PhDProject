@@ -38,16 +38,34 @@ void CMRFileExtractor::Extract()
 
 	QStringList r2cFilters;
 	r2cFilters << "_R2C";
+	r2cFilters << "_RT_2C";
 	r2cFilters << "_r2c";
 	r2cFilters << "_RV2C";
 
 	QStringList r3cFilters;
 	r3cFilters << "_R3C";
+	r3cFilters << "_RT_3C";
 	r3cFilters << "_r3c";
 	r3cFilters << "_RV3C";
 
 	for (int i = 0; i < files.size(); ++i)
 	{
+
+		if(Matches(files[i], r2cFilters))
+		{
+			if(m_Debug) std::cout << "R2C : " << files[i].toStdString() << std::endl;
+			LoadImage(dir.absoluteFilePath(files[i]), m_R2CImage);
+			continue;
+		}			
+
+		if(Matches(files[i], r3cFilters))
+		{
+			if(m_Debug) std::cout << "R3C : " << files[i].toStdString() << std::endl;
+			LoadImage(dir.absoluteFilePath(files[i]), m_R3CImage);
+			continue;
+		}			
+
+
 		if(Matches(files[i], c2Filters))
 		{
 			if(m_Debug) std::cout << "2C : " << files[i].toStdString() << std::endl;
@@ -76,20 +94,7 @@ void CMRFileExtractor::Extract()
 			continue;
 		}			
 
-		if(Matches(files[i], r2cFilters))
-		{
-			if(m_Debug) std::cout << "R2C : " << files[i].toStdString() << std::endl;
-			LoadImage(dir.absoluteFilePath(files[i]), m_R2CImage);
-			continue;
-		}			
-
-		if(Matches(files[i], r3cFilters))
-		{
-			if(m_Debug) std::cout << "R3C : " << files[i].toStdString() << std::endl;
-			LoadImage(dir.absoluteFilePath(files[i]), m_R3CImage);
-			continue;
-		}			
-
+	
 		//std::cout << "No Match : " << files[i].toStdString() << std::endl;
 	}
 
