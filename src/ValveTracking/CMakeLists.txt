@@ -5,6 +5,7 @@ set(lib_srcs
 	"JsonConverter.cpp"
 	"ValveLine.cpp"
 	"CMRFileExtractor.cpp"
+	"BoundingBox.cpp"
 	"ValveIO.cpp"
 	"ValveHelpers.cpp"
 	"ValveAligner.cpp"
@@ -16,6 +17,7 @@ set(lib_srcs
 set(lib_headers
 	"JsonConverter.h"
 	"CMRFileExtractor.h"
+	"BoundingBox.h"
 	"ValveOriginFinder.h"
 	"ValveAligner.h"
 	"OpenCVValve.h"

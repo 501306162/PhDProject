@@ -3,6 +3,7 @@ set(APP_NAMES
 	"ValveAlignment"
 	#"FeatureTest"
 	"ROITest"
+	"SegmentROIs"
 	"ValveROIFinder"
 	"SortOutDicom"
 	#"ModelTest"
