@@ -100,6 +100,8 @@ flags = [
 '-I',
 './Filters',
 '-I',
+'./SVM',
+'-I',
 './Apps',
 '-I',
 './External/gmock-1.7.0/include',

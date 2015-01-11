@@ -5,10 +5,20 @@ set(lib_srcs
 	"JsonConverter.cpp"
 	"ValveLine.cpp"
 	"CMRFileExtractor.cpp"
+	"FlipChecker.cpp"
 	"BoundingBox.cpp"
 	"ValveIO.cpp"
+	"PatchExtractor.cpp"
+	"FeatureExtractor.cpp"
+	"BinaryPatchFeatureExtractor.cpp"
+	"ValvePlane.cpp"
+	"TrainingData.cpp"
+	"ValveNormaliser.cpp"
 	"ValveHelpers.cpp"
+	"SVMClassifier.cpp"
 	"ValveAligner.cpp"
+	"SimpleMRFSegmenter.cpp"
+	"LBPFeatureExtractor.cpp"
 	"OpenCVValve.cpp"
 	"ValveOriginFinder.cpp"
 	"JsonReader.cpp")
@@ -16,10 +26,20 @@ set(lib_srcs
 
 set(lib_headers
 	"JsonConverter.h"
+	"SVMClassifier.h"
+	"PatchExtractor.h"
+	"BinaryPatchFeatureExtractor.h"
+	"LBPFeatureExtractor.h"
+	"TrainingData.h"
+	"ValvePlane.h"
+	"FeatureExtractor.h"
+	"FlipChecker.h"
+	"ValveNormaliser.h"
 	"CMRFileExtractor.h"
 	"BoundingBox.h"
 	"ValveOriginFinder.h"
 	"ValveAligner.h"
+	"SimpleMRFSegmenter.h"
 	"OpenCVValve.h"
 	"ValveLine.h"
 	"ValveHelpers.h"
@@ -38,7 +58,7 @@ include_directories(${OpenCV_DIRS})
 # ----------------------------------------------------------------------
 # Compile the library and install it
 add_library(${lib_name} SHARED ${lib_srcs} ${lib_headers})
-target_link_libraries(${lib_name} ${ITK_LIBRARIES} ${Qt4_LIBRARIES} hdf5_hl ${OpenCV_LIBS} qjson Utils)
+target_link_libraries(${lib_name} ${ITK_LIBRARIES} ${Qt4_LIBRARIES} hdf5_hl MRFLib SVM ${OpenCV_LIBS} qjson Utils)
 
 # ----------------------------------------------------------------------
 # install command for the library

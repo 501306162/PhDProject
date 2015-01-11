@@ -32,11 +32,27 @@ public:
 	void SetImage(const typename ImageType::Pointer &image) { m_Image = image; }
 	typename ImageType::Pointer GetImage() const { return m_Image; }
 
+	PointType GetPoint(const unsigned int index) const
+	{
+		if(index == 1)
+			return m_P1;
+		else
+			return m_P2;	
+	}
+
 	itkSetMacro(P1, PointType);
 	itkGetMacro(P1, PointType);
 	itkSetMacro(P2, PointType);
 	itkGetMacro(P2, PointType);
 
+	ContIndexType GetIndex(const unsigned int index) const 
+	{
+		if(index == 1)
+			return m_Ind1;
+		else
+			return m_Ind2;	
+	}
+	
 	itkSetMacro(Ind1, ContIndexType);
 	itkGetMacro(Ind1, ContIndexType);
 	itkSetMacro(Ind2, ContIndexType);

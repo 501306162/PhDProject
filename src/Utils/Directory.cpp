@@ -8,6 +8,50 @@
 namespace utils
 {
 // ------------------------------------------------------------------------
+Directory::FilenamesType Directory::GetDirectories(const DirectoryNameType &dir)
+{
+	Directory::Pointer directory = Directory::New();
+	directory->SetDirectory(dir);
+
+	return directory->GetDirectories();
+}
+
+// ------------------------------------------------------------------------
+Directory::FilenameType Directory::GetPath(const std::string &base, const std::string &ext)
+{
+	QDir dir(QString::fromStdString(base));
+	return dir.absoluteFilePath(QString::fromStdString(ext)).toStdString();
+
+}
+
+
+// ------------------------------------------------------------------------
+Directory::FilenamesType Directory::GetDirectories() const
+{
+	FilenamesType output;
+	if(m_Directory.empty())
+	{
+		std::cout << "Directory::GetOutput - Directory Name Not Set" << std::endl;
+		return output;
+	}
+
+
+	QDir dir(QString::fromStdString(m_Directory));
+
+	QStringList qDirnames;
+	qDirnames = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+
+	for(int i = 0; i < qDirnames.size(); i++)
+	{
+		output.push_back(dir.absoluteFilePath(qDirnames[i]).toStdString());
+	}
+
+	return output;
+
+}
+
+
+// ------------------------------------------------------------------------
 Directory::Directory()
 {
 	m_Directory = "";

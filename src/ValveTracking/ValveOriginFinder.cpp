@@ -1,6 +1,8 @@
 #include "ValveOriginFinder.h"
 
 #include <itkRegionOfInterestImageFilter.h>
+#include <itkPermuteAxesImageFilter.h>
+#include <itkFlipImageFilter.h>
 
 #include <Eigen/Dense>
 
@@ -45,14 +47,110 @@ void ValveOriginFinder::Compute()
 	m_Origin[1] = x(1,0);
 	m_Origin[2] = x(2,0);
 
+	m_Translation[0] = x(0,0);
+	m_Translation[1] = x(1,0);
+	m_Translation[2] = x(2,0);
 
 	// the Y axis is the stack normal
 	m_YAxis = saPlane.normal;
-
 	m_Rotation = m_Stack->GetDirection();
-	
-	
 }
+
+// ------------------------------------------------------------------------
+void ValveOriginFinder::ComputeNormalise()
+{
+
+	// extract the SA central image
+	ImageType::Pointer saSlice = ImageType::New();
+	ExtractSASlice(m_Stack, saSlice);
+
+	Plane saPlane;
+	ComputePlane(saSlice, saPlane);
+
+	// compute the plane equations of the 2c and 3c images
+	Plane c2Plane;
+	ComputePlane(m_2CImage, c2Plane);
+
+	Plane c3Plane;
+	ComputePlane(m_3CImage, c3Plane);
+
+	// build the matrixes
+	Eigen::Matrix3f A;
+	Eigen::Vector3f b;
+
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		A(0,i) = saPlane.normal[i]; 
+		A(1,i) = c2Plane.normal[i]; 
+		A(2,i) = c3Plane.normal[i]; 
+	}
+
+	b(0) = -saPlane.d;
+	b(1) = -c2Plane.d;
+	b(2) = -c3Plane.d;
+
+	Eigen::Vector3f x = A.fullPivLu().solve(b);
+
+	m_Origin[0] = x(0,0);
+	m_Origin[1] = x(1,0);
+	m_Origin[2] = x(2,0);
+
+
+	VectorType perp = itk::CrossProduct(saPlane.normal, c2Plane.normal);
+	perp.Normalize();
+
+	VectorType p1;
+   	p1[0] = m_Origin[0];
+   	p1[1] = m_Origin[1];
+   	p1[2] = m_Origin[2];
+
+
+
+	m_Center = p1;
+
+
+	VectorType upVec;
+	VectorType rotVec;
+
+	upVec[0] = m_2CImage->GetDirection()(0,1);
+	upVec[1] = m_2CImage->GetDirection()(1,1);
+	upVec[2] = m_2CImage->GetDirection()(2,1);
+
+	rotVec[0] = -m_2CImage->GetDirection()(0,2);
+	rotVec[1] = -m_2CImage->GetDirection()(1,2);
+	rotVec[2] = -m_2CImage->GetDirection()(2,2);
+
+	upVec.Normalize();
+	m_Angle = acos(perp*upVec);
+	m_Axis = rotVec;
+
+
+
+}
+
+// ------------------------------------------------------------------------
+void ValveOriginFinder::FlipImage(const ImageType::Pointer &input, ImageType::Pointer &output)
+{
+	ImageType::DirectionType dir = input->GetDirection();
+	typedef itk::PermuteAxesImageFilter<ImageType> PermType;
+	PermType::Pointer permer = PermType::New();
+	permer->SetInput(input);
+
+	PermType::PermuteOrderArrayType axes;
+	axes[0] = 1;
+	axes[1] = 0;
+	axes[2] = 2;
+
+	permer->SetOrder(axes);
+	permer->Update();
+
+	std::cout << input->GetOrigin() << std::endl;
+	output = permer->GetOutput();
+	output->SetDirection(dir);
+	std::cout << output->GetOrigin() << std::endl;
+}
+
+
 
 // ------------------------------------------------------------------------
 void ValveOriginFinder::ComputePlane(const ImageType::Pointer &image, Plane &plane)
@@ -71,8 +169,6 @@ void ValveOriginFinder::ComputePlane(const ImageType::Pointer &image, Plane &pla
    	normal[0] = image->GetDirection()(0,2);
    	normal[1] = image->GetDirection()(1,2);
    	normal[2] = image->GetDirection()(2,2);
-
-
 
 	// compute d
 	double sum = 0;

@@ -137,7 +137,7 @@ void MatrixIO::Write() throw (itk::ExceptionObject)
 
 	// start writing the int buffers
 	std::map<std::string, IntMatrixType>::iterator iIt = m_DataSet.intData.begin();
-	while(dIt != m_DataSet.doubleData.end())
+	while(iIt != m_DataSet.intData.end())
 	{
 		IntMatrixType mat = iIt->second;
 		hsize_t dims[2];

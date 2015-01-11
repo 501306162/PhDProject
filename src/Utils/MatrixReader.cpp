@@ -95,7 +95,6 @@ void MatrixReader::ReadMatrix(const std::string &name, DoubleMatrixType &mat)
 	hsize_t dims[2];
 	dspace.getSimpleExtentDims(dims);
 
-	std::cout << dims[0] << " " << dims[1] << std::endl;
 
 
 	// initialise the matrix

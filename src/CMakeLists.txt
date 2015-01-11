@@ -39,6 +39,7 @@ include_directories("${gtest_SOURCE_DIR}/include")
 # Gather together all the source subdirs and add them to the cmake process
 set(SRC_SUBDIRS 
 	"MRFLib"
+	"SVM"
 	"Utils"
 	"ValveTracking"
 	"Filters"

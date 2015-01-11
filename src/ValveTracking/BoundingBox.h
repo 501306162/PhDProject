@@ -8,7 +8,13 @@
 #include <itkBoundingBox.h>
 #include <itkVectorContainer.h>
 
-#include <itkTransform.h>
+#include <itkSimilarity3DTransform.h>
+#include <itkImage.h>
+
+#include <vtkSmartPointer.h>
+#include <vtkPolyData.h>
+#include <vtkBoundingBox.h>
+#include <vtkPoints.h>
 
 
 namespace vt
@@ -27,26 +33,43 @@ public:
 	typedef itk::Point<double, 3> PointType;
 	typedef itk::VectorContainer<int, PointType> PointContainerType;
 	typedef itk::BoundingBox<int, 3, double, PointContainerType> BoundingBoxType;
+	
+	typedef itk::Image<unsigned short, 3> ImageType;
+	typedef ImageType::IndexType IndexType;
+	typedef itk::Image<unsigned char, 3> MaskType;
 
 	void Load(const std::string &filename, const int exclude=-1);
 
-	typedef itk::Transform<double, 3, 3> TransformType;
+	typedef itk::Similarity3DTransform<double> TransformType;
 
 	void TransformBoundingBox(const TransformType::Pointer &transform);
+	void ApplyInflation(BoundingBoxType::Pointer &box, double &inflation);
+	void ComputeImageMask(const ImageType::Pointer &image, unsigned int point, MaskType::Pointer &mask);
+	void SetInfation(const double &inflation) { m_Inflation = inflation; }
+	bool IsInside(const PointType &point, vtkSmartPointer<vtkPolyData> &box);
+
 
 protected:
-	BoundingBox() {}
+	BoundingBox() : m_Inflation(0.5) {}
 	virtual ~BoundingBox() {}
 
 private:
 	BoundingBox(const Self&);
 	void operator=(const Self&);
 
-	void SetBoundingBox(const PointContainerType::Pointer &points, BoundingBoxType::Pointer &box);
+	void ExtractMaskMinMaxIndex(const ImageType::Pointer &image, 
+			const BoundingBoxType::Pointer &box,
+			ImageType::RegionType &region);
 
-	BoundingBoxType::Pointer m_BoundingBoxP1;
-	BoundingBoxType::Pointer m_BoundingBoxP2;
+	void SetBoundingBox(vtkSmartPointer<vtkPoints> &points, vtkSmartPointer<vtkPolyData> &box);
+	void ApplyTransform(vtkSmartPointer<vtkPolyData> &input, 
+			const TransformType::Pointer &transform, 
+			vtkSmartPointer<vtkPolyData> &output);
 
+	vtkSmartPointer<vtkPolyData> m_BoundingBoxP1;
+	vtkSmartPointer<vtkPolyData> m_BoundingBoxP2;
+
+	double m_Inflation;
 
 };
 

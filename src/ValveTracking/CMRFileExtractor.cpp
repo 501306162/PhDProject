@@ -2,10 +2,13 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <itkOrientImageFilter.h>
 
 
 #include <itkImageFileReader.h>
 #include <itkNrrdImageIO.h>
+#include <itkPermuteAxesImageFilter.h>
+#include <itkFlipImageFilter.h>
 
 #include <itkExtractImageFilter.h>
 
@@ -147,6 +150,48 @@ bool CMRFileExtractor::Matches(const QString &filename, const QStringList &filte
 
 }
 
+
+// ------------------------------------------------------------------------
+void CMRFileExtractor::FlipImage(const ImageType::Pointer &input, ImageType::Pointer &output)
+{
+	typedef itk::OrientImageFilter<ImageType, ImageType> OreinterType;
+	OreinterType::Pointer orienter = OreinterType::New();
+	orienter->SetInput(input);
+	orienter->SetGivenCoordinateOrientation(itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSA);
+	orienter->SetDesiredCoordinateOrientation(itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSA);
+	orienter->Update();
+
+	output = orienter->GetOutput();
+
+	/*
+	ImageSeriesType::DirectionType dir = input->GetDirection();
+	typedef itk::PermuteAxesImageFilter<ImageSeriesType> PermType;
+	PermType::Pointer permer = PermType::New();
+	permer->SetInput(input);
+
+	PermType::PermuteOrderArrayType axes;
+	axes[0] = 1;
+	axes[1] = 0;
+	axes[2] = 2;
+	axes[3] = 3;
+
+	permer->SetOrder(axes);
+	permer->Update();
+
+	output = permer->GetOutput();
+
+
+	typedef itk::FlipImageFilter<ImageSeriesType> FlipperType;
+	FlipperType::Pointer flipper = FlipperType::New();
+	FlipperType::FlipAxesArrayType flipAxes;
+	flipAxes.Fill(false);
+
+	*/
+
+
+}
+
+
 // ------------------------------------------------------------------------
 void CMRFileExtractor::LoadImage(const QString &filename, ImageSeriesType::Pointer &image)
 {
@@ -157,6 +202,7 @@ void CMRFileExtractor::LoadImage(const QString &filename, ImageSeriesType::Point
 	reader->Update();
 
 	image = reader->GetOutput();
+
 }
 
 // ------------------------------------------------------------------------
@@ -181,7 +227,16 @@ CMRFileExtractor::ExtractImageTimeStep(const ImageSeriesType::Pointer &image,
 	extractor->SetDirectionCollapseToSubmatrix();
 	extractor->Update();
 
+	ImageType::Pointer output = ImageType::New();
+	if(m_Flip)
+	{
+		FlipImage(extractor->GetOutput(), output);
+		return output;
+	}
+
 	return extractor->GetOutput();
+
+	
 
 }
 

@@ -125,16 +125,18 @@ template<int VDimensions>
 void ValveSequenceWriter<VDimensions>::Write()
 {
 	std::string dataPart = m_Filename + ".txt";
-	
 	unsigned int timeSteps = m_Sequence->GetNumberOfLines();
 
 	QVariantList fileList;
 
 	for(unsigned int i = 0; i < timeSteps; i++)
 	{
+		QVariantMap map;
 		std::stringstream ss;
 		ss << m_Filename << "_time_" << i;
 		std::string partFilename = ss.str();
+		
+		typename ValveLineType::Pointer line = m_Sequence->GetValveLine(i);
 
 		typename ValveWriter<VDimensions>::Pointer writer = ValveWriter<VDimensions>::New();
 		writer->SetFileName(partFilename);
@@ -143,7 +145,31 @@ void ValveSequenceWriter<VDimensions>::Write()
 
 		QString fname = QString::fromStdString(partFilename);
 
-		fileList << fname;
+		map["filename"] = fname;
+		QVariantMap p1, p2;
+		p1["x"] = line->GetP1()[0];
+		p1["y"] = line->GetP1()[1];
+		p1["z"] = line->GetP1()[2];
+	
+		p2["x"] = line->GetP2()[0];
+		p2["y"] = line->GetP2()[1];
+		p2["z"] = line->GetP2()[2];
+
+		QVariantMap i1, i2;
+		i1["x"] = line->GetInd1()[0];
+		i1["y"] = line->GetInd1()[1];
+		i1["z"] = line->GetInd1()[2];
+
+		i2["x"] = line->GetInd2()[0];
+		i2["y"] = line->GetInd2()[1];
+		i2["z"] = line->GetInd2()[2];
+
+		map["p1"] = p1;
+		map["p2"] = p2;
+		map["i1"] = i1;
+		map["i2"] = i2;
+
+		fileList << map;
 	}
 
 	QJson::Serializer serialiser;

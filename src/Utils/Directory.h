@@ -29,9 +29,12 @@ public:
 	itkGetMacro(Extension, FilenameType);
 
 	FilenamesType GetOutput() const;
+	FilenamesType GetDirectories() const;
 
 
 	static FilenamesType GetFiles(const DirectoryNameType &dir, const FilenameType &extension="");
+	static FilenamesType GetDirectories(const DirectoryNameType &dir);
+	static FilenameType GetPath(const std::string &base, const std::string &ext);
 
 protected:
 	Directory();

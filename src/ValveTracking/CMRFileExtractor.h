@@ -35,13 +35,17 @@ public:
 	ImageType::Pointer GetR3CImage(const unsigned int index);
 	ImageType::Pointer GetStackImage(const unsigned int index);
 
+	itkSetMacro(Flip, bool);
+
+	void FlipImage(const ImageType::Pointer &input, ImageType::Pointer &output);
+
 	ImageType::Pointer ExtractImageTimeStep(const ImageSeriesType::Pointer &image, 
 			const unsigned int index);
 
 	void SetDebug(bool val) { m_Debug = val; }
 
 protected:
-	CMRFileExtractor() : m_Debug(false) {};
+	CMRFileExtractor() : m_Debug(false), m_Flip(false) {};
 	virtual ~CMRFileExtractor() {}
 
 private:
@@ -49,6 +53,8 @@ private:
 	void operator=(const Self&);
 
 	std::string m_FolderName;
+
+	bool m_Flip;
 
 	ImageSeriesType::Pointer m_Stack;
 	ImageSeriesType::Pointer m_2CImage;

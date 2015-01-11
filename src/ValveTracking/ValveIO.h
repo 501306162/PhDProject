@@ -89,6 +89,7 @@ public:
 	itkTypeMacro(ValveSequenceWriter, Object);
 	itkNewMacro(Self);
 
+	typedef ValveLine<VDimensions> ValveLineType;
 	typedef ValveSequence<VDimensions> ValveSequenceType;
 
 	void Write();

@@ -4,10 +4,16 @@ set(APP_NAMES
 	#"FeatureTest"
 	"ROITest"
 	"SegmentROIs"
+	"ExtractPatch"
 	"ValveROIFinder"
+	"ExtractTrainingFeatures"
 	"SortOutDicom"
+	"ValveDataAppender"
+	"PlaneCalculator"
+	"ComputeAlignedPlanes"
 	#"ModelTest"
 	"ValveNameReplacer"
+	"Testing"
 	"SAStackBuilder")
 
 set(DataSorter_SRC "DataSorter.cpp")

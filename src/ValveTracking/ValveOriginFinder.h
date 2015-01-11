@@ -34,6 +34,7 @@ public:
 	void SetImageStack(const ImageType::Pointer &image) { m_Stack = image; }
 
 	void Compute();
+	void ComputeNormalise();
 	
 	void ComputePlane(const ImageType::Pointer &image, Plane &plane);
 	void ExtractPlanePoints(const ImageType::Pointer &image, PointListType &points);
@@ -43,9 +44,19 @@ public:
 	PointType GetOrigin() const { return m_Origin; }
 	VectorType GetAxis() const { return m_YAxis; }
 	RotationType GetRotation() const { return m_Rotation; }
+	VectorType GetTranslation() const { return m_Translation; }
+
+
+	itkSetMacro(Flip, bool);
+
+	VectorType GetCenter() const { return m_Center; }
+	VectorType GetAxisAngle() const { return m_Axis; }
+	double GetAngle() const { return m_Angle; }
+
+	void FlipImage(const ImageType::Pointer &input, ImageType::Pointer &output);
 
 protected:
-	ValveOriginFinder() {}
+	ValveOriginFinder() : m_Flip(false) {}
 	virtual ~ValveOriginFinder() {}
 
 private:
@@ -56,8 +67,16 @@ private:
 	ImageType::Pointer m_3CImage;
 	ImageType::Pointer m_Stack;
 
+
+	double m_Angle;
+	VectorType m_Axis;
+	VectorType m_Center;
+
+	bool m_Flip;
+
 	PointType m_Origin;
 	VectorType m_YAxis;
+	VectorType m_Translation;
 
 	RotationType m_Rotation;
 

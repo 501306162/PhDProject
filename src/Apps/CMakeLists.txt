@@ -6,6 +6,7 @@ set(APPS
 	"DataPrep"
 	"SegmentationGenerator"
 	"PlaneFinder"
+	"ValveDataAppender"
 	#"iresisd-1.1"
 	"ValveTracking"
 	"DicomSorter")
