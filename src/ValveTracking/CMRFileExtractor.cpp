@@ -157,7 +157,7 @@ void CMRFileExtractor::FlipImage(const ImageType::Pointer &input, ImageType::Poi
 	typedef itk::OrientImageFilter<ImageType, ImageType> OreinterType;
 	OreinterType::Pointer orienter = OreinterType::New();
 	orienter->SetInput(input);
-	orienter->SetGivenCoordinateOrientation(itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSA);
+	orienter->SetGivenCoordinateOrientation(itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLA);
 	orienter->SetDesiredCoordinateOrientation(itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSA);
 	orienter->Update();
 
@@ -230,8 +230,8 @@ CMRFileExtractor::ExtractImageTimeStep(const ImageSeriesType::Pointer &image,
 	ImageType::Pointer output = ImageType::New();
 	if(m_Flip)
 	{
-		FlipImage(extractor->GetOutput(), output);
-		return output;
+		//FlipImage(extractor->GetOutput(), output);
+		//return output;
 	}
 
 	return extractor->GetOutput();

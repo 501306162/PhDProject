@@ -12,7 +12,7 @@ namespace vt
 FlipChecker::FlipChecker()
 {
 	// load the file
-	QString flipFileName = "/home/om0000/ValveTracking/ToFlip/ToFlip.json";
+	QString flipFileName = "/Users/oliverferoze/ValveTracking/ToFlip/ToFlip.json";
 	QFile file(flipFileName);
 	file.open(QIODevice::ReadOnly | QIODevice::Text);
 

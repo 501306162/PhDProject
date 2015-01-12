@@ -14,6 +14,9 @@
 #include <vtkPolyDataWriter.h>
 #include <vtkSmartPointer.h>
 #include <itkSimilarity3DTransform.h>
+#include <itkCovarianceSampleFilter.h>
+#include <itkListSample.h>
+#include <FlipChecker.h>
 
 typedef utils::Directory::FilenamesType FilenamesType;
 
@@ -29,32 +32,41 @@ int main(int argc, char ** argv)
 	meanNormal.Fill(0);
 	ValvePlane::PointType meanPoint;
 	meanPoint.Fill(0);
+
+
+	std::vector<int> ids;
+	
+
+	typedef itk::Vector<double, 6> MeasurementType;
+	typedef itk::Statistics::ListSample<MeasurementType> SampleType;
+	typedef itk::Statistics::CovarianceSampleFilter<SampleType> CovarianceFilterType;
+
+	const unsigned int numberOfTimeSteps = 25;
+
+
+	// create the list of samples
+	std::vector<SampleType::Pointer> samplesList;
+	for(unsigned int i = 0; i < numberOfTimeSteps; i++) samplesList.push_back(SampleType::New());
+
 	
 
 	FilenamesType planeFilenames = utils::Directory::GetFiles(inputDirectory, ".txt");
+	FlipChecker::Pointer checker = FlipChecker::New();
 	for(unsigned int i = 0; i < planeFilenames.size(); i++)
 	{
+
 		// load the valve plane
 		ValvePlaneSequence::Pointer sequence = ValvePlaneSequence::Load(planeFilenames[i]);
-		ValvePlane::Pointer valve = sequence->GetValvePlane(0);
-		
+		bool needsFlip = checker->FlipImageFromFileName("MV-2C", planeFilenames[i]);
 
 		// get the data directory
 		std::string dataFolder = utils::Directory::GetPath(dataDirectory, sequence->GetName());
 
-
 		// load up the data 
 		CMRFileExtractor::Pointer extractor = CMRFileExtractor::New();
-		std::cout << dataFolder << std::endl;
 		extractor->SetFolderName(dataFolder);
-		extractor->SetDebug(true);
-		//extractor->SetFlip(true);
+		extractor->SetFlip(needsFlip);
 		extractor->Extract();
-
-		utils::ImageVolumeIO::Write("stack.nrrd", extractor->GetStackImage(0));
-		utils::ImageVolumeIO::Write("2Co.nrrd", extractor->Get2CImage(0));
-		utils::ImageVolumeIO::Write("3Co.nrrd", extractor->Get3CImage(0));
-
 
 		ValveOriginFinder::Pointer originFinder = ValveOriginFinder::New();
 		originFinder->Set2CImage(extractor->Get2CImage(0));
@@ -67,79 +79,54 @@ int main(int argc, char ** argv)
 		transform->SetTranslation(originFinder->GetTranslation());
 		transform->SetMatrix(originFinder->GetRotation());
 
-
+		std::cout << sequence->GetName() << " " << sequence->GetNumberOfPlanes() << std::endl;
 		
-		std::cout << valve->GetNormal() << std::endl;
-		std::cout << valve->GetCenter() << std::endl;
-		//ValvePlane::VectorType normal = transform->GetInverseTransform()->TransformCovariantVector(valve->GetNormal());
-		//ValvePlane::PointType center = transform->GetInverseTransform()->TransformPoint(valve->GetCenter());
-		ValvePlane::VectorType normal = valve->GetNormal();
-		ValvePlane::PointType center = valve->GetCenter();
-		std::cout << normal << std::endl;
-		std::cout << center << std::endl;
-
-		for(unsigned int j = 0; j < 3; j++)
+		for(unsigned int ts = 0; ts < numberOfTimeSteps; ts++)
 		{
-			meanNormal[j] += (normal[j] / (double) planeFilenames.size());
-			meanPoint[j] += (center[j] / (double) planeFilenames.size());
-		}
+			ValvePlane::Pointer valve = sequence->GetValvePlane(ts);
+			ValvePlane::VectorType normal = transform->GetInverseTransform()->TransformCovariantVector(valve->GetNormal());
+			ValvePlane::PointType center = transform->GetInverseTransform()->TransformPoint(valve->GetCenter());
 
-		std::cout << sequence->GetName() << std::endl;
+			if(needsFlip)
+			{
+				normal = -normal;
+			}
 
-		typedef CMRFileExtractor::ImageType ImageType;
-		utils::ImageVolumeIO::Write("orig.nrrd", extractor->Get2CImage(0));
+			for(unsigned int j = 0; j < 3; j++)
+			{
+				meanNormal[j] += (normal[j] / (double) planeFilenames.size());
+				meanPoint[j] += (center[j] / (double) planeFilenames.size());
+			}
 
-		ImageType::DirectionType dir1 = extractor->Get3CImage(0)->GetDirection();
-		ImageType::DirectionType dir2 = extractor->Get2CImage(0)->GetDirection();
-		ImageType::DirectionType newDir1, newDir2;
-		for(unsigned int j = 0; j < 3; j++)
-		{
-			ValvePlane::VectorType v1;
-			v1[0] = dir1(0,j);
-			v1[1] = dir1(1,j);
-			v1[2] = dir1(2,j);
-			ValvePlane::VectorType v2 = transform->GetInverseTransform()->TransformCovariantVector(v1);
-			newDir1(0,j) = v2[0];
-			newDir1(1,j) = v2[1];
-			newDir1(2,j) = v2[2];
+			MeasurementType mv;
+			mv[0] = center[0];
+			mv[1] = center[1];
+			mv[2] = center[2];
+			mv[3] = normal[0];
+			mv[4] = normal[1];
+			mv[5] = normal[2];
 
-
-			v1[0] = dir2(0,j);
-			v1[1] = dir2(1,j);
-			v1[2] = dir2(2,j);
-			v2 = transform->GetInverseTransform()->TransformCovariantVector(v1);
-			newDir2(0,j) = v2[0];
-			newDir2(1,j) = v2[1];
-			newDir2(2,j) = v2[2];
+			samplesList[ts]->PushBack(mv);
 
 		}
 
-		typedef itk::ResampleImageFilter<ImageType, ImageType> ResamplerType;
-		ResamplerType::Pointer resampler = ResamplerType::New();
-		resampler->SetInput(extractor->Get2CImage(0));
-		resampler->SetTransform(transform);
-		resampler->SetOutputParametersFromImage(extractor->Get2CImage(0));
-		resampler->SetOutputOrigin(transform->GetInverseTransform()->TransformPoint(extractor->Get2CImage(0)->GetOrigin()));
-		resampler->SetOutputDirection(newDir2);
-		resampler->Update();
-		
-		utils::ImageVolumeIO::Write("2C.nrrd", resampler->GetOutput());
+
+	}
+
+	for(unsigned int i = 0; i < numberOfTimeSteps; i++)
+	{
+		SampleType::Pointer samples = samplesList[i];
+
+		CovarianceFilterType::Pointer covFilter = CovarianceFilterType::New();
+		covFilter->SetInput(samples);
+		covFilter->Update();
+
+		MeasurementType mv = covFilter->GetMean();
 
 
-
-		ResamplerType::Pointer resampler2 = ResamplerType::New();
-		resampler2->SetInput(extractor->Get3CImage(0));
-		resampler2->SetTransform(transform);
-		resampler2->SetOutputParametersFromImage(extractor->Get3CImage(0));
-		resampler2->SetOutputOrigin(transform->GetInverseTransform()->TransformPoint(extractor->Get3CImage(0)->GetOrigin()));
-		resampler2->SetOutputDirection(newDir1);
-		resampler2->Update();
-
-		utils::ImageVolumeIO::Write("3C.nrrd", resampler2->GetOutput());
-		
 		vtkSmartPointer<vtkPlaneSource> source = vtkSmartPointer<vtkPlaneSource>::New();
-		source->SetCenter(center[0], center[1], center[2]);
-		source->SetNormal(normal[0], normal[1], normal[2]);
+		source->SetCenter(mv[0], mv[1], mv[2]);
+		source->SetNormal(mv[3], mv[4], mv[5]);
 		source->SetResolution(1,1);
 		source->Update();
 
@@ -185,50 +172,56 @@ int main(int argc, char ** argv)
 
 
 
-	vtkSmartPointer<vtkPlaneSource> source = vtkSmartPointer<vtkPlaneSource>::New();
-	source->SetCenter(meanPoint[0], meanPoint[1], meanPoint[2]);
-	source->SetNormal(meanNormal[0], meanNormal[1], meanNormal[2]);
-	source->SetResolution(1,1);
-	source->Update();
-
-	vtkSmartPointer<vtkPolyData> poly = vtkSmartPointer<vtkPolyData>::New();
-	poly = source->GetOutput();
-
-	vtkSmartPointer<vtkPoints> p = poly->GetPoints();
-	double cent[3];
-	cent[0] = 0.0; cent[1] = 0.0; cent[2] = 0.0;
-
-	for(unsigned int j = 0; j < p->GetNumberOfPoints(); j++)
-	{
-		cent[0] += p->GetPoint(j)[0] / (double) p->GetNumberOfPoints();
-		cent[1] += p->GetPoint(j)[1] / (double) p->GetNumberOfPoints();
-		cent[2] += p->GetPoint(j)[2] / (double) p->GetNumberOfPoints();
-	}
-
-	for(unsigned int j = 0; j < p->GetNumberOfPoints(); j++)
-	{
-		double pin[3];
-		p->GetPoint(j,pin);		
-
-		for(unsigned int k = 0; k < 3; k++)
-		{
-			pin[k] -= cent[k];
-			pin[k] *= 100;
-			pin[k] += cent[k];
-		}
-
-		p->SetPoint(j,pin);
-
-	}
-
-	vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
-	writer->SetFileName("mean.vtk");
-	writer->SetInputData(poly);
-	writer->Write();
-
 
 
 	return 0;
 }
 
+/*
+			typedef CMRFileExtractor::ImageType ImageType;
+			ImageType::DirectionType dir1 = extractor->Get3CImage(ts)->GetDirection();
+			ImageType::DirectionType dir2 = extractor->Get2CImage(ts)->GetDirection();
+			ImageType::DirectionType newDir1, newDir2;
+			for(unsigned int j = 0; j < 3; j++)
+			{
+				ValvePlane::VectorType v1;
+				v1[0] = dir1(0,j);
+				v1[1] = dir1(1,j);
+				v1[2] = dir1(2,j);
+				ValvePlane::VectorType v2 = transform->GetInverseTransform()->TransformCovariantVector(v1);
+				newDir1(0,j) = v2[0];
+				newDir1(1,j) = v2[1];
+				newDir1(2,j) = v2[2];
 
+
+				v1[0] = dir2(0,j);
+				v1[1] = dir2(1,j);
+				v1[2] = dir2(2,j);
+				v2 = transform->GetInverseTransform()->TransformCovariantVector(v1);
+				newDir2(0,j) = v2[0];
+				newDir2(1,j) = v2[1];
+				newDir2(2,j) = v2[2];
+
+			}
+
+			typedef itk::ResampleImageFilter<ImageType, ImageType> ResamplerType;
+			ResamplerType::Pointer resampler = ResamplerType::New();
+			resampler->SetInput(extractor->Get2CImage(ts));
+			resampler->SetTransform(transform);
+			resampler->SetOutputParametersFromImage(extractor->Get2CImage(ts));
+			resampler->SetOutputOrigin(transform->GetInverseTransform()->TransformPoint(extractor->Get2CImage(ts)->GetOrigin()));
+			resampler->SetOutputDirection(newDir2);
+			resampler->Update();
+
+			utils::ImageVolumeIO::Write("image2C.nrrd", resampler->GetOutput());
+
+			ResamplerType::Pointer resampler2 = ResamplerType::New();
+			resampler2->SetInput(extractor->Get3CImage(ts));
+			resampler2->SetTransform(transform);
+			resampler2->SetOutputParametersFromImage(extractor->Get3CImage(ts));
+			resampler2->SetOutputOrigin(transform->GetInverseTransform()->TransformPoint(extractor->Get3CImage(ts)->GetOrigin()));
+			resampler2->SetOutputDirection(newDir1);
+			resampler2->Update();
+
+			utils::ImageVolumeIO::Write("image3C.nrrd", resampler2->GetOutput());
+*/

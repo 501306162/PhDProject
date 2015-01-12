@@ -74,6 +74,7 @@ public:
 
 	itkGetMacro(Name, std::string);
 
+	unsigned int GetNumberOfPlanes() const  { return m_Planes.size(); }
 protected:
 	ValvePlaneSequence() {}
 	virtual ~ValvePlaneSequence() {}
