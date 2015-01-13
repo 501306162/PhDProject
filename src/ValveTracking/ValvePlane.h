@@ -10,6 +10,7 @@
 
 namespace vt 
 {
+
 // ------------------------------------------------------------------------
 class ValvePlane : public itk::Object 
 {

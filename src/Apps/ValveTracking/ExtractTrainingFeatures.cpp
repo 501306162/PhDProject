@@ -7,6 +7,7 @@
 #include <SimpleMRFSegmenter.h>
 #include <BinaryPatchFeatureExtractor.h>
 #include <MatrixWriter.h>
+#include <CommonDefinitions.h>
 
 
 
@@ -47,20 +48,25 @@ void extractFeatures(const MaskType::Pointer &seg, const IndexlistType &indices,
 		unsigned int featureSize, MatrixType &features);
 void extractFeature(const MaskType::Pointer &mask, const ContIndexType &location, 
 		unsigned int featureSize, MatrixType & feature); 
+void writePNG(const ImageType::Pointer &patch, const std::string filename);
 
 
 int main(int argc, char **argv)
 {
+
+	const std::string inputDirectory = argv[1];
+	const std::string outputFileName = argv[2];
+	const std::string lookup = argv[3];
+	const unsigned int pointToConsider = atoi(argv[4]);
+
 	const unsigned int segmentationPatchSize = 40;
-	const unsigned int pointToConsider = 1;
 	const unsigned int negativeFeatureRegionSize = 30;
 	const unsigned int featurePatchSize = 10;
 	const unsigned int featureLength = featurePatchSize*featurePatchSize;
 	const double negativeIgnoreDistance = static_cast<double>(featurePatchSize) / 2.0;
-	std::string outputFileName = argv[2];
 
 
-	utils::Directory::FilenamesType inputFilenames = utils::Directory::GetFiles(argv[1], ".txt");
+	utils::Directory::FilenamesType inputFilenames = utils::Directory::GetFiles(inputDirectory, ".txt");
 	FlipChecker::Pointer flipChecker = FlipChecker::New();
 
 	std::vector<MatrixType> negativeFeatures;
@@ -81,7 +87,6 @@ int main(int argc, char **argv)
 		unsigned int ownerId = fname.replace("d","").toInt();
 		featureOwnershipList.push_back(ownerId);
 
-		std::cout << "Extracting: " << ownerId << std::endl;
 
 		// load the valve sequence
 		ValveSequenceReader<3>::Pointer reader = ValveSequenceReader<3>::New();
@@ -94,9 +99,27 @@ int main(int argc, char **argv)
 		// normalise the line with a possible flip
 		ValveNormaliser::Pointer normaliser = ValveNormaliser::New();
 		normaliser->SetInput(line);
-		normaliser->SetFlip(flipChecker->FlipImage("MV-2C", ownerId));
+		bool toFlip = flipChecker->FlipImage(lookup, ownerId);
+		bool toFlipPoints = flipChecker->FlipPoints(lookup, ownerId);
+		if(lookup == "MV-3C") toFlip = !toFlip;
+
+		normaliser->SetFlip(toFlip);
+		normaliser->SetFlipPoints(toFlipPoints);
 		normaliser->Normalise();
 		ValveLine<3>::Pointer aligned = normaliser->GetOutput();
+
+		std::cout << "Extracting: " << ownerId  << " "  << toFlip <<  " " << toFlipPoints << std::endl;
+
+		ImagePatchExtractor::Pointer testExtractor = ImagePatchExtractor::New();
+		testExtractor->SetImage(aligned->GetImage());
+		testExtractor->SetPatchCenter(aligned->GetIndex(pointToConsider));
+
+		ImagePatchExtractor::SizeType testPatchSize;
+		testPatchSize.Fill(100);
+		testExtractor->SetPatchSize(testPatchSize);
+
+		ImageType::Pointer testPatch = testExtractor->ExtractPatch();
+		writePNG(testPatch, fname.toStdString()+".png");
 		
 	
 
@@ -332,4 +355,26 @@ void extractFeature(const MaskType::Pointer &mask, const ContIndexType &location
 	featureBuilder->SetInput(patch);
 	featureBuilder->Extract(feature);
 }
+
+// ------------------------------------------------------------------------
+void writePNG(const ImageType::Pointer &patch, const std::string filename)
+{
+	typedef itk::Image<unsigned char, 3> PNGType;
+	typedef itk::RescaleIntensityImageFilter<ImageType,PNGType> RescalerType;
+	RescalerType::Pointer rescaler = RescalerType::New();
+	rescaler->SetInput(patch);
+	rescaler->SetOutputMaximum(255);
+	rescaler->SetOutputMinimum(0);
+	
+
+	typedef itk::ImageFileWriter<PNGType> TestWriterType;
+	TestWriterType::Pointer testWriter = TestWriterType::New();
+	testWriter->SetInput(rescaler->GetOutput());
+	testWriter->SetImageIO(itk::PNGImageIO::New());
+	testWriter->SetFileName(filename);
+	//testWriter->Update();
+	
+
+}
+
 

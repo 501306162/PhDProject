@@ -23,15 +23,17 @@ public:
 
 	void SetInput(const ValveType::Pointer &input) { m_Valve = input; }
 	void SetFlip(bool flip) { m_Flip = flip; }
+	void SetFlipPoints(bool flip) { m_FlipPoints = flip; }
 	void Normalise();
 	ValveType::Pointer GetOutput() const { return m_Output; }
 
 	void FlipValve(const ValveType::Pointer &input, ValveType::Pointer &output);
 	void AlignValve(const ValveType::Pointer &input, ValveType::Pointer &output);
+	void FlipPoints(const ValveType::Pointer &input, ValveType::Pointer &output);
 
 
 protected:
-	ValveNormaliser() : m_Flip(false) {}
+	ValveNormaliser();
 	virtual ~ValveNormaliser() {}
 
 
@@ -44,6 +46,7 @@ private:
 	ValveType::Pointer m_Valve;
 	ValveType::Pointer m_Output;
 	bool m_Flip;
+	bool m_FlipPoints;
 
 
 };

@@ -17,6 +17,8 @@
 #include <itkCovarianceSampleFilter.h>
 #include <itkListSample.h>
 #include <FlipChecker.h>
+#include <MatrixCommon.h>
+#include <MatrixWriter.h>
 
 typedef utils::Directory::FilenamesType FilenamesType;
 
@@ -41,8 +43,17 @@ int main(int argc, char ** argv)
 	typedef itk::Statistics::ListSample<MeasurementType> SampleType;
 	typedef itk::Statistics::CovarianceSampleFilter<SampleType> CovarianceFilterType;
 
+	FilenamesType planeFilenames = utils::Directory::GetFiles(inputDirectory, ".txt");
 	const unsigned int numberOfTimeSteps = 25;
+	const unsigned int numberOfPlanes = planeFilenames.size();
 
+
+	typedef utils::DoubleMatrixType MatrixType;
+	typedef utils::IntMatrixType IntMatrixType;
+
+	MatrixType planes = MatrixType::Zero(numberOfTimeSteps*numberOfPlanes, 6);
+	IntMatrixType timeSteps = IntMatrixType::Zero(numberOfTimeSteps*numberOfPlanes, 1);
+	IntMatrixType owners = IntMatrixType::Zero(numberOfTimeSteps*numberOfPlanes,1);
 
 	// create the list of samples
 	std::vector<SampleType::Pointer> samplesList;
@@ -50,7 +61,6 @@ int main(int argc, char ** argv)
 
 	
 
-	FilenamesType planeFilenames = utils::Directory::GetFiles(inputDirectory, ".txt");
 	FlipChecker::Pointer checker = FlipChecker::New();
 	for(unsigned int i = 0; i < planeFilenames.size(); i++)
 	{
@@ -98,77 +108,89 @@ int main(int argc, char ** argv)
 				meanPoint[j] += (center[j] / (double) planeFilenames.size());
 			}
 
-			MeasurementType mv;
-			mv[0] = center[0];
-			mv[1] = center[1];
-			mv[2] = center[2];
-			mv[3] = normal[0];
-			mv[4] = normal[1];
-			mv[5] = normal[2];
+			unsigned int matIndex = i*numberOfTimeSteps+ts;
+			planes(matIndex,0) = center[0];
+			planes(matIndex,1) = center[1];
+			planes(matIndex,2) = center[2];
+			planes(matIndex,3) = normal[0];
+			planes(matIndex,4) = normal[1];
+			planes(matIndex,5) = normal[2];
 
-			samplesList[ts]->PushBack(mv);
+			timeSteps(matIndex,0) = ts;
+			owners(matIndex,0) = QString::fromStdString(sequence->GetName()).replace("d","").toInt();
+
 
 		}
 
 
 	}
 
-	for(unsigned int i = 0; i < numberOfTimeSteps; i++)
-	{
-		SampleType::Pointer samples = samplesList[i];
+	utils::MatrixDataSet::Pointer dataSet = utils::MatrixDataSet::New();
+	dataSet->AddData("planes", planes);
+	dataSet->AddData("time_steps", timeSteps);
+	dataSet->AddData("owners", owners);
+	utils::MatrixWriter::Pointer writer = utils::MatrixWriter::New();
+	writer->SetInput(dataSet);
+	writer->SetFilename(argv[3]);
+	writer->Write();
 
-		CovarianceFilterType::Pointer covFilter = CovarianceFilterType::New();
-		covFilter->SetInput(samples);
-		covFilter->Update();
 
-		MeasurementType mv = covFilter->GetMean();
+	//for(unsigned int i = 0; i < numberOfTimeSteps; i++)
+	//{
+		//SampleType::Pointer samples = samplesList[i];
+
+		//CovarianceFilterType::Pointer covFilter = CovarianceFilterType::New();
+		//covFilter->SetInput(samples);
+		//covFilter->Update();
+
+		//MeasurementType mv = covFilter->GetMean();
 
 
-		vtkSmartPointer<vtkPlaneSource> source = vtkSmartPointer<vtkPlaneSource>::New();
-		source->SetCenter(mv[0], mv[1], mv[2]);
-		source->SetNormal(mv[3], mv[4], mv[5]);
-		source->SetResolution(1,1);
-		source->Update();
+		//vtkSmartPointer<vtkPlaneSource> source = vtkSmartPointer<vtkPlaneSource>::New();
+		//source->SetCenter(mv[0], mv[1], mv[2]);
+		//source->SetNormal(mv[3], mv[4], mv[5]);
+		//source->SetResolution(1,1);
+		//source->Update();
 
-		vtkSmartPointer<vtkPolyData> poly = vtkSmartPointer<vtkPolyData>::New();
-		poly = source->GetOutput();
+		//vtkSmartPointer<vtkPolyData> poly = vtkSmartPointer<vtkPolyData>::New();
+		//poly = source->GetOutput();
 
-		vtkSmartPointer<vtkPoints> p = poly->GetPoints();
-		double cent[3];
-		cent[0] = 0.0; cent[1] = 0.0; cent[2] = 0.0;
+		//vtkSmartPointer<vtkPoints> p = poly->GetPoints();
+		//double cent[3];
+		//cent[0] = 0.0; cent[1] = 0.0; cent[2] = 0.0;
 
-		for(unsigned int j = 0; j < p->GetNumberOfPoints(); j++)
-		{
-			cent[0] += p->GetPoint(j)[0] / (double) p->GetNumberOfPoints();
-			cent[1] += p->GetPoint(j)[1] / (double) p->GetNumberOfPoints();
-			cent[2] += p->GetPoint(j)[2] / (double) p->GetNumberOfPoints();
-		}
+		//for(unsigned int j = 0; j < p->GetNumberOfPoints(); j++)
+		//{
+			//cent[0] += p->GetPoint(j)[0] / (double) p->GetNumberOfPoints();
+			//cent[1] += p->GetPoint(j)[1] / (double) p->GetNumberOfPoints();
+			//cent[2] += p->GetPoint(j)[2] / (double) p->GetNumberOfPoints();
+		//}
 
-		for(unsigned int j = 0; j < p->GetNumberOfPoints(); j++)
-		{
-			double pin[3];
-			p->GetPoint(j,pin);		
+		//for(unsigned int j = 0; j < p->GetNumberOfPoints(); j++)
+		//{
+			//double pin[3];
+			//p->GetPoint(j,pin);		
 
-			for(unsigned int k = 0; k < 3; k++)
-			{
-				pin[k] -= cent[k];
-				pin[k] *= 100;
-				pin[k] += cent[k];
-			}
+			//for(unsigned int k = 0; k < 3; k++)
+			//{
+				//pin[k] -= cent[k];
+				//pin[k] *= 100;
+				//pin[k] += cent[k];
+			//}
 
-			p->SetPoint(j,pin);
+			//p->SetPoint(j,pin);
 
-		}
+		//}
 
-		std::stringstream ss;
-		ss << i << ".vtk";
+		//std::stringstream ss;
+		//ss << i << ".vtk";
 
-		vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
-		writer->SetFileName(ss.str().c_str());
-		writer->SetInputData(poly);
-		writer->Write();
+		//vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
+		//writer->SetFileName(ss.str().c_str());
+		//writer->SetInputData(poly);
+		//writer->Write();
 
-	}
+	//}
 
 
 

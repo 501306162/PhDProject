@@ -5,6 +5,7 @@ set(APP_NAMES
 	"ROITest"
 	"SegmentROIs"
 	"ExtractPatch"
+	"TestFitting"
 	"ValveROIFinder"
 	"ExtractTrainingFeatures"
 	"SortOutDicom"

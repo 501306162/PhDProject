@@ -7,6 +7,13 @@
 namespace vt
 {
 // ------------------------------------------------------------------------
+ValveNormaliser::ValveNormaliser() 
+{
+	m_FlipPoints = false;
+	m_Flip = false;
+}
+
+// ------------------------------------------------------------------------
 void ValveNormaliser::Normalise()
 {
 	ValveType::Pointer workingValve = ValveType::New();
@@ -15,8 +22,28 @@ void ValveNormaliser::Normalise()
 	else
 		workingValve = m_Valve;
 
+	if(m_FlipPoints)
+		FlipPoints(workingValve, workingValve);
+
+
 	AlignValve(workingValve, m_Output);
 }
+
+// ------------------------------------------------------------------------
+void ValveNormaliser::FlipPoints(const ValveType::Pointer &input, ValveType::Pointer &output)
+{
+	ValveType::PointType tmp1, tmp2;
+	tmp1 = input->GetP1();
+	tmp2 = input->GetP2();
+
+
+	output->SetImage(input->GetImage());
+	output->SetP1(tmp2);
+	output->SetP2(tmp1);
+	output->UpdateIndexs();
+
+}
+
 
 // ------------------------------------------------------------------------
 void ValveNormaliser::FlipValve(const ValveType::Pointer &input, ValveType::Pointer &output)
@@ -108,8 +135,8 @@ void ValveNormaliser::AlignValve(const ValveType::Pointer &input, ValveType::Poi
 	// create the output 
 	if(!output) output = ValveLine<3>::New();
 	output->SetImage(resampler->GetOutput());
-	output->SetP1(transform->TransformPoint(p1));
-	output->SetP2(transform->TransformPoint(p2));
+	output->SetP1(transform->TransformPoint(input->GetP1()));
+	output->SetP2(transform->GetInverseTransform()->TransformPoint(input->GetP2()));
 	output->UpdateIndexs();
 }
 

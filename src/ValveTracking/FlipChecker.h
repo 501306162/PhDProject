@@ -3,6 +3,7 @@
 
 #include <itkObject.h>
 #include <itkObjectFactory.h>
+#include <QVariant>
 
 namespace vt
 {
@@ -22,6 +23,7 @@ public:
 
 	bool FlipImage(const std::string &type, const int number);
 	bool FlipImageFromFileName(const std::string type, const std::string &filename);
+	bool FlipPoints(const std::string &type, const int number);
 
 
 protected:
@@ -30,9 +32,14 @@ protected:
 
 
 private:
+
+	void BuildMap(QVariantMap input, FlipMap &map);
+
+
 	FlipChecker(const Self&);
 	void operator=(const Self&);
 	FlipMap m_FlipMap;
+	FlipMap m_PointFlipMap;
 };
 
 
