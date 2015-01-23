@@ -35,6 +35,8 @@ public:
 	static FilenamesType GetFiles(const DirectoryNameType &dir, const FilenameType &extension="");
 	static FilenamesType GetDirectories(const DirectoryNameType &dir);
 	static FilenameType GetPath(const std::string &base, const std::string &ext);
+	static bool FileExists(const std::string &filename);
+	static FilenameType GetFileName(const std::string &filepath);
 
 protected:
 	Directory();

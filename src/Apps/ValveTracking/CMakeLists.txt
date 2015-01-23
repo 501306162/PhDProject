@@ -1,17 +1,22 @@
 set(APP_NAMES 
 	"ParseResults"
 	"ValveAlignment"
+	"PatchTest"
+
 	#"FeatureTest"
 	"ROITest"
+	"TrainClassifiers"
+	"ComputeNewPlanes"
 	"SegmentROIs"
 	"ExtractPatch"
-	"TestFitting"
+	#"TestFitting"
 	"ValveROIFinder"
-	"ExtractTrainingFeatures"
 	"SortOutDicom"
 	"ValveDataAppender"
+	"FlipPoints"
 	"PlaneCalculator"
 	"ComputeAlignedPlanes"
+	"ComputeLineLengths"
 	#"ModelTest"
 	"ValveNameReplacer"
 	"Testing"
@@ -37,7 +42,30 @@ foreach(APP ${APP_NAMES})
 	install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${APP}" DESTINATION "${bin_path}/ValveTracking")
 endforeach()
 
+set(Extractor_SRCS "ExtractTrainingFeatures.cpp" "ExtractTrainingFeaturesFunctions.cpp")
 
+add_executable(ExtractTrainingFeatures ${Extractor_SRCS})
+target_link_libraries(ExtractTrainingFeatures ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/ExtractTrainingFeatures" DESTINATION "${bin_path}/ValveTracking")
+
+
+
+#set(Fitting_SRCS "Fitting.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+#add_executable(Fitting ${Fitting_SRCS})
+#target_link_libraries(Fitting ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+#install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/Fitting" DESTINATION "${bin_path}/ValveTracking")
+
+set(Fitting2_SRCS "Fitting2.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+add_executable(Fitting2 ${Fitting2_SRCS})
+target_link_libraries(Fitting2 ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/Fitting2" DESTINATION "${bin_path}/ValveTracking")
+
+
+
+set(MeanShiftTest_SRCS "MeanShiftTest.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+add_executable(MeanShiftTest ${MeanShiftTest_SRCS})
+target_link_libraries(MeanShiftTest ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/MeanShiftTest" DESTINATION "${bin_path}/ValveTracking")
 
 qt4_wrap_cpp(headers_moc "main_window.h")
 add_executable(DataSorter "DataSorter.cpp" "main_window.cpp" ${headers_moc})

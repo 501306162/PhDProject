@@ -6,12 +6,11 @@
 
 namespace vt
 {
-template<typename TImageType>
-class LBPFeatureExtractor : public FeatureExtractor<TImageType>
+class LBPFeatureExtractor : public FeatureExtractor<itk::Image<unsigned short, 3> >
 {
 public:
 	typedef LBPFeatureExtractor Self;
-	typedef FeatureExtractor<TImageType> Superclass;	
+	typedef FeatureExtractor<itk::Image<unsigned short, 3> > Superclass;	
 	typedef itk::SmartPointer<Self> Pointer;
 	typedef itk::SmartPointer<const Self> ConstPointer;
 
@@ -21,14 +20,26 @@ public:
 	itkTypeMacro(LBPFeatureExtractor, FeatureExtractor);
 	itkNewMacro(Self);
 
+	typedef Superclass::FeatureType FeatureType;
+	virtual void Extract(FeatureType &feature);
+	itkSetMacro(NumNeighbours, unsigned int);
+	itkSetMacro(Radius, double);
+	itkSetMacro(GridX, unsigned int);
+	itkSetMacro(GridY, unsigned int);
+
 protected:
-	LBPFeatureExtractor() {}
+	LBPFeatureExtractor();
 	virtual ~LBPFeatureExtractor() {}
 
 
 private:
 	LBPFeatureExtractor(const Self&);
 	void operator=(const Self&);
+
+	unsigned int m_NumNeighbours;
+	unsigned int m_Radius;
+	unsigned int m_GridX;
+	unsigned int m_GridY;
 
 };
 

@@ -41,7 +41,21 @@ void ValvePlane::Initialise(const QVariantMap &planeData)
 }
 
 
-
+// ------------------------------------------------------------------------
+ValvePlane::PointListType ValvePlane::GetAllPoints() const
+{
+	PointListType output;
+	PointMapType::const_iterator mapIt = m_Points.begin();
+	while(mapIt != m_Points.end())
+	{
+		for(unsigned int i = 0; i < mapIt->second.size(); i++)
+		{
+			output.push_back(mapIt->second[i]);			
+		}
+		++mapIt;
+	}
+	return output;
+}
 
 // ------------------------------------------------------------------------
 ValvePlaneSequence::Pointer ValvePlaneSequence::Load(const std::string &filename)

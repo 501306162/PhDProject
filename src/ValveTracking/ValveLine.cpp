@@ -1,7 +1,7 @@
 #include "ValveLine.h"
 
 #include <vtkLineSource.h>
-
+#include <itkPermuteAxesImageFilter.h>
 
 namespace vt {
 // ------------------------------------------------------------------------
@@ -44,6 +44,61 @@ ValveLine<VDimensions>::GetPolyData() const
 	return lineSource->GetOutput();
 }
 
+
+// ------------------------------------------------------------------------
+template<int VDimensions>
+void ValveLine<VDimensions>::FlipPoints()
+{
+	PointType tmp1, tmp2;
+	tmp1 = GetP1();
+	tmp2 = GetP2();
+
+	SetP1(tmp2);
+	SetP2(tmp1);
+	UpdateIndexs();
+
+}
+
+// ------------------------------------------------------------------------
+template<int VDimensions>
+void ValveLine<VDimensions>::FlipImage()
+{
+	typename ImageType::DirectionType outputDirection = m_Image->GetDirection();
+
+	typedef itk::PermuteAxesImageFilter<ImageType> FlipperType;
+	typename FlipperType::PermuteOrderArrayType axes;
+	axes[0] = 1;
+	axes[1] = 0;
+	axes[2] = 2;
+
+	typename FlipperType::Pointer flipper = FlipperType::New();
+	flipper->SetInput(m_Image);
+	flipper->SetOrder(axes);
+	flipper->Update();
+
+	typename ImageType::Pointer outputImage = flipper->GetOutput();
+	outputImage->SetDirection(outputDirection);
+
+	
+	// flip the points as well
+	ContIndexType ind1 = GetInd1();
+	ContIndexType ind2 = GetInd2();
+
+	double tmp1, tmp2;
+	tmp1 = ind1[0];
+	tmp2 = ind2[0];
+
+	ind1[0] = ind1[1];
+	ind1[1] = tmp1;
+
+	ind2[0] = ind2[1];
+	ind2[1] = tmp2;
+
+	SetImage(outputImage);
+	SetInd1(ind1);
+	SetInd2(ind2);
+	UpdatePoints();
+}
 
 }
 

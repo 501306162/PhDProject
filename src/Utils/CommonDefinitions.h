@@ -29,8 +29,8 @@ typedef ImageIO<RealVolume> RealVolumeIO;
 typedef ImageIO<RealSlice> RealSliceIO;
 
 
-/* some useful functions */
-double DegreesToRadians(double degree)
+
+/*double DegreesToRadians(double degree)
 {
 	double mult = M_PI / 180.0;
 	return degree * mult;
@@ -77,7 +77,7 @@ double MagnitudeFrom2DVector(double x, double y)
 {
 	return std::sqrt((x*x)+(y*y));
 }
-
+*/
 
 } /* utils */ 
 

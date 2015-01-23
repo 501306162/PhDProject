@@ -10,6 +10,7 @@ find_package(ITK REQUIRED)
 find_package(VTK REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 
 message(${QT_INCLUDE_DIR})

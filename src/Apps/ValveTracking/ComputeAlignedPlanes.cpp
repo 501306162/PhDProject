@@ -8,11 +8,6 @@
 #include <itkCenteredAffineTransform.h>
 #include <itkResampleImageFilter.h>
 #include <CommonDefinitions.h>
-#include <vtkPlaneSource.h>
-#include <vtkPolyData.h>
-#include <vtkPoints.h>
-#include <vtkPolyDataWriter.h>
-#include <vtkSmartPointer.h>
 #include <itkSimilarity3DTransform.h>
 #include <itkCovarianceSampleFilter.h>
 #include <itkListSample.h>
@@ -54,6 +49,13 @@ int main(int argc, char ** argv)
 	MatrixType planes = MatrixType::Zero(numberOfTimeSteps*numberOfPlanes, 6);
 	IntMatrixType timeSteps = IntMatrixType::Zero(numberOfTimeSteps*numberOfPlanes, 1);
 	IntMatrixType owners = IntMatrixType::Zero(numberOfTimeSteps*numberOfPlanes,1);
+	
+	typedef CMRFileExtractor::ImageType ImageType;
+	typedef ImageType::PointType PointType;
+
+	std::vector<PointType> allPoints;
+	std::vector<unsigned int> pointOwners;
+	std::vector<unsigned int> pointTimeSteps;
 
 	// create the list of samples
 	std::vector<SampleType::Pointer> samplesList;
@@ -97,6 +99,16 @@ int main(int argc, char ** argv)
 			ValvePlane::VectorType normal = transform->GetInverseTransform()->TransformCovariantVector(valve->GetNormal());
 			ValvePlane::PointType center = transform->GetInverseTransform()->TransformPoint(valve->GetCenter());
 
+
+			ValvePlane::PointListType allPlanePoints = valve->GetAllPoints();
+			for(unsigned int j = 0; j < allPlanePoints.size(); j++)
+			{
+				PointType newPoint = transform->GetInverseTransform()->TransformPoint(allPlanePoints[j]);
+				allPoints.push_back(newPoint);
+				pointOwners.push_back(QString::fromStdString(sequence->GetName()).replace("d","").toInt());
+				pointTimeSteps.push_back(ts);
+			}
+
 			if(needsFlip)
 			{
 				normal = -normal;
@@ -118,17 +130,32 @@ int main(int argc, char ** argv)
 
 			timeSteps(matIndex,0) = ts;
 			owners(matIndex,0) = QString::fromStdString(sequence->GetName()).replace("d","").toInt();
-
-
 		}
-
-
 	}
+
+	// build the point matrixes
+	MatrixType pointMatrix = MatrixType(allPoints.size(), 3);
+	IntMatrixType pointOwnerMatrix = IntMatrixType(allPoints.size(), 1);
+	IntMatrixType pointTimesMatrix = IntMatrixType(allPoints.size(), 1);
+	for(unsigned int i = 0; i < allPoints.size(); i++)
+	{
+		pointMatrix(i,0) = allPoints[i][0];		
+		pointMatrix(i,1) = allPoints[i][1];		
+		pointMatrix(i,2) = allPoints[i][2];		
+		pointOwnerMatrix(i,0) = pointOwners[i];
+		pointTimesMatrix(i,0) = pointTimeSteps[i];
+	}
+
+
 
 	utils::MatrixDataSet::Pointer dataSet = utils::MatrixDataSet::New();
 	dataSet->AddData("planes", planes);
 	dataSet->AddData("time_steps", timeSteps);
 	dataSet->AddData("owners", owners);
+	dataSet->AddData("points", pointMatrix);
+	dataSet->AddData("point_owners", pointOwnerMatrix);
+	dataSet->AddData("point_times", pointTimesMatrix);
+
 	utils::MatrixWriter::Pointer writer = utils::MatrixWriter::New();
 	writer->SetInput(dataSet);
 	writer->SetFilename(argv[3]);

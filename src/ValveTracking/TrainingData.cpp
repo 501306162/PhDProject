@@ -1,6 +1,7 @@
 #include "TrainingData.h"
 
 #include <MatrixReader.h>
+#include <itkPoint.h>
 
 namespace vt 
 {
@@ -9,14 +10,76 @@ ValveTrainingData::Pointer ValveTrainingData::Load(const std::string &filename)
 {
 	ValveTrainingData::Pointer data = ValveTrainingData::New();
 	data->LoadData(filename);
+	data->SetNumTimeSteps(25);
 	return data;
 }
 
 
 // ------------------------------------------------------------------------
+void ValveTrainingData::GetTrainingPoints(const unsigned int exclude, const unsigned int timeStep, MatrixType &points)
+{
+	// get the output size of the matrixes	
+	unsigned int outputCount = m_Points.rows() - OwnershipCount(m_PointOwners, exclude);
+	unsigned int timed = TimeStepCount();
+	unsigned int size = (int) ((double) outputCount / (double) timed);
+
+
+	unsigned int featureLength = m_Points.cols();
+	points = MatrixType(size, featureLength);
+
+	unsigned int rowCount = 0;
+	for(unsigned int i = 0; i < m_PointOwners.rows(); i++)
+	{
+		if(m_PointOwners(i,0) != (int) exclude && m_PointTimes(i,0) == (int) timeStep)
+		{
+			points.row(rowCount) = m_Points.row(i);
+			rowCount++;
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------
+void ValveTrainingData::GetTrainingPoints(const unsigned int exclude, const unsigned int timeStep, 
+		std::vector<MatrixType> &points)
+{
+	std::vector<int> ownerList = OwnerList();
+	
+	typedef itk::Point<double, 3> PointType;
+	typedef std::vector<MatrixType> PointList;
+	typedef std::map<int, PointList> PointMap;
+
+	PointMap tmpPoints;
+	for(unsigned int i = 0; i < m_Points.rows(); i++)
+	{
+		if(m_PointOwners(i,0) != (int) exclude && m_PointTimes(i,0) == (int) timeStep)
+		{
+			int owner = m_PointOwners(i,0);
+			tmpPoints[owner].push_back(m_Points.row(i));
+		}
+	}
+
+	PointMap::iterator mapIt = tmpPoints.begin();
+	while(mapIt != tmpPoints.end())
+	{
+		MatrixType pmat = MatrixType(3, mapIt->second.size());
+		for(unsigned int i = 0; i < mapIt->second.size(); i++)
+		{
+			pmat.col(i) = mapIt->second[i].row(0).transpose();			
+		}
+		
+		points.push_back(pmat);
+
+		++mapIt;
+	}
+
+
+}
+
+// ------------------------------------------------------------------------
 void ValveTrainingData::GetTestData(const unsigned int include, const unsigned int timeStep, MatrixType &planes)
 {
-	unsigned int owned = OwnershipCount(include);
+	unsigned int owned = OwnershipCount(m_Owners, include);
 	unsigned int timed = TimeStepCount();
 
 	unsigned int size = (int) ((double) owned / (double) timed);
@@ -40,12 +103,13 @@ void ValveTrainingData::GetTestData(const unsigned int include, const unsigned i
 void ValveTrainingData::GetTrainingData(const unsigned int exclude, const unsigned int timeStep, MatrixType &planes)
 {
 	// get the output size of the matrixes	
-	unsigned int outputCount = m_Planes.rows() - OwnershipCount(exclude);
+	unsigned int outputCount = m_Planes.rows() - OwnershipCount(m_Owners, exclude);
 	unsigned int timed = TimeStepCount();
 	unsigned int size = (int) ((double) outputCount / (double) timed);
 
 
 	unsigned int featureLength = m_Planes.cols();
+
 	planes = MatrixType(size, featureLength);
 
 	unsigned int rowCount = 0;
@@ -88,17 +152,20 @@ void ValveTrainingData::LoadData(const std::string &filename)
 	m_Planes = dataSet->doubleData["planes"];
 	m_TimeSteps = dataSet->intData["time_steps"];
 	m_Owners = dataSet->intData["owners"];
+	m_Points = dataSet->doubleData["points"];
+	m_PointOwners = dataSet->intData["point_owners"];
+	m_PointTimes = dataSet->intData["point_times"];
 }
 
 
 // ------------------------------------------------------------------------
-unsigned int ValveTrainingData::OwnershipCount(unsigned int ownerId)
+unsigned int ValveTrainingData::OwnershipCount(const IntMatrixType &mat, unsigned int ownerId)
 {
-	unsigned int rows = m_Owners.rows();
+	unsigned int rows = mat.rows();
 	unsigned int count = 0;
 	for(unsigned int i = 0; i < rows; i++)
 	{
-		if(m_Owners(i,0) == (int) ownerId)
+		if(mat(i,0) == (int) ownerId)
 			count++;
 	}
 
@@ -198,6 +265,33 @@ void TrainingData::GetTrainingData(const unsigned int exclude, MatrixType &X, In
 		}
 	}
 }
+
+
+// ------------------------------------------------------------------------
+void TrainingData::GetPositiveTrainingData(const unsigned int exclude, MatrixType &X)
+{
+	unsigned int count = 0;
+	for(unsigned int i = 0; i < m_y.rows(); i++)
+	{
+		if(m_y(i,0) == 1 && m_Owners(i,0) != (int) exclude)
+			count++;		
+	}
+
+	X = MatrixType(count, m_X.cols());
+
+	count = 0;
+	for(unsigned int i = 0; i < m_y.rows(); i++)
+	{
+		if(m_y(i,0) == 1 && m_Owners(i,0) != (int) exclude)
+		{
+			MatrixType r = m_X.row(i).normalized();
+			X.row(count) = r;
+			count++;
+		}
+	}
+}
+
+
 
 // ------------------------------------------------------------------------
 unsigned int TrainingData::OwnershipCount(unsigned int ownerId)

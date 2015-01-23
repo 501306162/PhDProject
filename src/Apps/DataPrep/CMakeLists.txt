@@ -8,7 +8,7 @@ set(APP_NAMES
 	"LearnGMMs"
 	"ComputeDistanceMaps"
 	"VolumePointPicker"
-	"FeatureLearning"
+	#"FeatureLearning"
 	"NonRigidShapeAlignment"
 	"ThresholdFunction"
 	"CineExtractor"

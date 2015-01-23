@@ -4,6 +4,9 @@ project(${project_name})
 
 enable_testing()
 
+set(QT_QMAKE_EXECUTABLE /usr/bin/qmake-qt4)
+
+
 # ----------------------------------------------------------------------
 # includes the cmake modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")

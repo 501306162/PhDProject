@@ -5,15 +5,27 @@ set(lib_srcs
 	"JsonConverter.cpp"
 	"ValveLine.cpp"
 	"CMRFileExtractor.cpp"
+	"lbp.cpp"
+	"PatchTrainingData.cpp"
+	"lbp_hist.cpp"
 	"FlipChecker.cpp"
 	"BoundingBox.cpp"
+	"LineIntersectionFinder.cpp"
 	"ValveIO.cpp"
+	"ResultViewer.cpp"
 	"PatchExtractor.cpp"
+
 	"FeatureExtractor.cpp"
+	"LBPFeatureExtractor.cpp"
+	"ValvePointCandidateFinder.cpp"
 	"BinaryPatchFeatureExtractor.cpp"
 	"ValvePlane.cpp"
+	"LengthData.cpp"
+	"TestData.cpp"
 	"TrainingData.cpp"
+	"CandidateLineFinder.cpp"
 	"ValveNormaliser.cpp"
+	"ParameterHelpers.cpp"
 	"ValveHelpers.cpp"
 	"SVMClassifier.cpp"
 	"ValveAligner.cpp"
@@ -26,8 +38,21 @@ set(lib_srcs
 
 set(lib_headers
 	"JsonConverter.h"
+	"ResultViewer.h"
+	"PatchExtractor2.h"
+	"PatchExtractor2.hpp"
+	"LengthData.h"
+	"CandidateLineFinder.h"
+	"ValvePointCandidateFinder.h"
 	"SVMClassifier.h"
+	"TestData.h"
+	"lbp.h"
+	"PatchTrainingData.h"
+	"ParameterHelpers.h"
+	"lbp_hist.h"
 	"PatchExtractor.h"
+	"LBPFeatureExtractor.h"
+	"LineIntersectionFinder.h"
 	"BinaryPatchFeatureExtractor.h"
 	"LBPFeatureExtractor.h"
 	"TrainingData.h"
@@ -51,14 +76,13 @@ set(lib_headers
 
 set(lib_include_dir "${include_path}/${lib_name}")
 
-find_package(OpenCV REQUIRED)
 
 include_directories(${OpenCV_DIRS})
 
 # ----------------------------------------------------------------------
 # Compile the library and install it
 add_library(${lib_name} SHARED ${lib_srcs} ${lib_headers})
-target_link_libraries(${lib_name} ${ITK_LIBRARIES} ${Qt4_LIBRARIES} hdf5_hl MRFLib SVM ${OpenCV_LIBS} qjson Utils)
+target_link_libraries(${lib_name} ${ITK_LIBRARIES} ${Qt4_LIBRARIES} ${OpenCV_LIBS} hdf5_hl MRFLib SVM qjson Utils)
 
 # ----------------------------------------------------------------------
 # install command for the library

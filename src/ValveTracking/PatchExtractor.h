@@ -63,6 +63,7 @@ private:
 
 typedef PatchExtractor<unsigned short> ImagePatchExtractor;
 typedef PatchExtractor<unsigned char> MaskPatchExtractor;
+typedef PatchExtractor<double> RealPatchExtractor;
 
 }
 

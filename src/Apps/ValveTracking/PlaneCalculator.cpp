@@ -182,8 +182,8 @@ void computePlane(std::vector<PointType> &inputPoints, MatrixType &normal, Matri
 	// get the eigen vectors
 	Eigen::SelfAdjointEigenSolver<MatrixType> solver(C);
 
-	normal = solver.eigenvectors().col(0);
-	point = centroid;
+	normal = solver.eigenvectors().col(0).transpose();
+	point = centroid.transpose();
 
 	/*
 	vtkSmartPointer<vtkPlaneSource> source = vtkSmartPointer<vtkPlaneSource>::New();

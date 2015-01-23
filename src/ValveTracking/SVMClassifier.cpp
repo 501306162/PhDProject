@@ -22,7 +22,7 @@ void SVMClassifier::Train(const MatrixType &X, const IntMatrixType &y)
 	// build the parameters 
 	ParametersType * params = new ParametersType;
 	params->svm_type = C_SVC;
-	params->kernel_type = POLY;
+	params->kernel_type = LINEAR;
 	params->cache_size = 1000.00;
 	params->C = 1;
 	params->gamma = 1.0 / (double) X.cols();
@@ -76,6 +76,22 @@ void SVMClassifier::PredictProbability(const MatrixType &X, IntMatrixType &class
 		probs(i,0) = pr[0];
 		probs(i,1) = pr[1];
 	}
+}
+
+// ------------------------------------------------------------------------
+bool SVMClassifier::Save(const std::string &filename)
+{
+	if(svm_save_model(filename.c_str(), m_Model) == 0) return true;
+	else return false;
+}
+
+
+// ------------------------------------------------------------------------
+bool SVMClassifier::Load(const std::string &filename)
+{
+	m_Model = svm_load_model(filename.c_str());
+	if(m_Model == NULL) return false;
+	else return true;
 }
 
 // ------------------------------------------------------------------------

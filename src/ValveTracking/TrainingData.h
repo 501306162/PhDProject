@@ -28,6 +28,8 @@ public:
 	itkSetMacro(NumTimeSteps, unsigned int);
 
 	void GetTrainingData(const unsigned int exclude, const unsigned int timeStep, MatrixType &planes);
+	void GetTrainingPoints(const unsigned int exclude, const unsigned int timeStep, MatrixType &points);
+	void GetTrainingPoints(const unsigned int exclude, const unsigned int timeStep, std::vector<MatrixType> &points);
 	void GetTestData(const unsigned int include, const unsigned int timeStep, MatrixType &planes);
 	std::vector<int> OwnerList();
 
@@ -39,13 +41,16 @@ protected:
 
 private:
 
-	unsigned int OwnershipCount(unsigned int ownerId);
+	unsigned int OwnershipCount(const IntMatrixType &mat, unsigned int ownerId);
 	unsigned int TimeStepCount();
 
 	MatrixType m_Planes;
 	IntMatrixType m_TimeSteps;
 	unsigned int m_NumTimeSteps;
 	IntMatrixType m_Owners;
+	MatrixType m_Points;
+	IntMatrixType m_PointOwners;
+	IntMatrixType m_PointTimes;
 	
 
 	ValveTrainingData(const Self&);
@@ -73,6 +78,7 @@ public:
 	void LoadData(const std::string &filename);
 
 	void GetTrainingData(const unsigned int exclude, MatrixType &X, IntMatrixType &y);
+	void GetPositiveTrainingData(const unsigned int exclude, MatrixType &X);
 	void GetTestData(const unsigned int include, MatrixType &X, IntMatrixType &y);
 	std::vector<int> OwnerList();
 

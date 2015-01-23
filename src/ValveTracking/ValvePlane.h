@@ -33,6 +33,7 @@ public:
 	itkGetMacro(Normal, VectorType);
 	itkGetMacro(Center, PointType);
 
+	PointListType GetAllPoints() const;
 	PointListType GetPoints(const std::string &key) const { return m_Points.at(key); }
 	PointType GetPoint(const std::string &key, const unsigned int index) const { return m_Points.at(key)[index]; }
 

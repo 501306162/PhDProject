@@ -32,6 +32,10 @@ public:
 	void SetImage(const typename ImageType::Pointer &image) { m_Image = image; }
 	typename ImageType::Pointer GetImage() const { return m_Image; }
 
+
+	void FlipImage();
+	void FlipPoints();
+
 	PointType GetPoint(const unsigned int index) const
 	{
 		if(index == 1)

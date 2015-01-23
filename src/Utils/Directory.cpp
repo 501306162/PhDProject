@@ -7,6 +7,14 @@
 
 namespace utils
 {
+
+// ------------------------------------------------------------------------
+Directory::FilenameType Directory::GetFileName(const std::string &filepath)
+{
+	QFileInfo info(filepath.c_str());
+	return info.fileName().toStdString();
+}
+
 // ------------------------------------------------------------------------
 Directory::FilenamesType Directory::GetDirectories(const DirectoryNameType &dir)
 {
@@ -22,6 +30,14 @@ Directory::FilenameType Directory::GetPath(const std::string &base, const std::s
 	QDir dir(QString::fromStdString(base));
 	return dir.absoluteFilePath(QString::fromStdString(ext)).toStdString();
 
+}
+
+
+// ------------------------------------------------------------------------
+bool Directory::FileExists(const std::string &filename)
+{
+	QFileInfo info(QString::fromStdString(filename));
+	return info.exists();
 }
 
 

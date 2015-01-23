@@ -8,6 +8,7 @@ set(lib_name "Utils")
 # Get the sources for the library
 set(lib_srcs 
 	"FilenamesReader.cpp"
+	"ConfigParser.cpp"
 	"Directory.cpp"
    	"MatrixIO.cpp"
 	"VonMisesDistribution.cpp"
@@ -26,6 +27,7 @@ set(lib_headers
 	"Helpers.h"
 	"Directory.h"
 	"Helpers.hpp"
+	"ConfigParser.h"
 	"ImageIO.h"
 	"CardiacDicomExtractor.h"
 	"VonMisesDistribution.h"
@@ -53,7 +55,7 @@ if(NOT "${lib_srcs}" STREQUAL "")
 	# ----------------------------------------------------------------------
 	# Compile the library and install it
 	add_library(${lib_name} SHARED ${lib_srcs} ${lib_headers})
-	target_link_libraries(${lib_name} ${ITK_LIBRARIES} ${Qt4_LIBRARIES} hdf5_hl)
+	target_link_libraries(${lib_name} ${ITK_LIBRARIES} ${Qt4_LIBRARIES} qjson hdf5_hl)
 
 	# ----------------------------------------------------------------------
 	# install command for the library

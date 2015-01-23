@@ -20,10 +20,6 @@ FlipChecker::FlipChecker()
 	QVariantMap data = parser.parse(&file).toMap();
 	BuildMap(data["coords"].toMap(), m_FlipMap);
 	BuildMap(data["points"].toMap(), m_PointFlipMap);
-
-
-
-
 	file.close();
 
 }
@@ -74,10 +70,18 @@ bool FlipChecker::FlipImage(const std::string &type, const int number)
 	for(unsigned int i = 0; i < list.size(); i++)
 	{
 		if(list[i] == number)
-			return true;
+		{	
+			if(type == "MV-3C")
+				return false;
+			else 
+				return true;
+		}
 	}
 
-	return false;
+	if(type == "MV-3C")
+		return true;
+	else 
+		return false;
 }
 
 // ------------------------------------------------------------------------

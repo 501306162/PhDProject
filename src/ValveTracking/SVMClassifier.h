@@ -2,6 +2,7 @@
 #define SVM_CLASSIFIER_H
 
 #include "TrainingData.h"
+#include "PatchTrainingData.h"
 #include <svm.h>
 
 
@@ -28,6 +29,8 @@ public:
 
 	void Train(const MatrixType &X, const IntMatrixType &y);
 	void PredictProbability(const MatrixType &X, IntMatrixType &classes, MatrixType &probs);
+	bool Save(const std::string &filename);
+	bool Load(const std::string &filename);
 
 
 protected:

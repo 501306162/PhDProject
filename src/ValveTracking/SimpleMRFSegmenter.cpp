@@ -22,6 +22,7 @@ SimpleMRFSegmenter::SimpleMRFSegmenter()
 	m_SmoothnessCost = 1.0;
 	m_SmallestCheck = 0.00000001;
 	m_OutputValue  = 1;
+	m_MaskValue = 1;
 }
 
 // ------------------------------------------------------------------------
@@ -111,7 +112,7 @@ void SimpleMRFSegmenter::CreateMembershipFunction()
 	ListSampleFilterType::Pointer listSampleFilter = ListSampleFilterType::New();
 	listSampleFilter->SetInput(m_Image);
 	listSampleFilter->SetMaskImage(m_Mask);
-	listSampleFilter->SetMaskValue(1);
+	listSampleFilter->SetMaskValue(m_MaskValue);
 
 	try 
 	{

@@ -36,6 +36,8 @@ public:
 	itkSetMacro(SmoothnessCost, double);
 	itkSetMacro(OutputValue, MaskType::ValueType); 
 
+	itkSetMacro(MaskValue, unsigned char);
+
 
 protected:
 	SimpleMRFSegmenter();
@@ -53,6 +55,7 @@ private:
 	MaskType::Pointer m_Mask;
 	MaskType::Pointer m_Output;
 	MaskType::ValueType m_OutputValue;
+	unsigned char m_MaskValue;
 
 	MembershipFunctionType::Pointer m_PositiveFunction;
 	MembershipFunctionType::Pointer m_NegativeFunction;

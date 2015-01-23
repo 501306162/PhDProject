@@ -30,6 +30,33 @@ void ValveNormaliser::Normalise()
 }
 
 // ------------------------------------------------------------------------
+void ValveNormaliser::UnNormalise()
+{
+	ImageType::Pointer image = m_Valve->GetImage();
+
+	typedef itk::ResampleImageFilter<ImageType, ImageType> ResamplerType;
+	ResamplerType::Pointer resampler = ResamplerType::New();
+	resampler->SetInput(image);
+	resampler->SetTransform(m_Transform->GetInverseTransform());
+	resampler->SetOutputParametersFromImage(image);
+	resampler->Update();
+
+	m_Output = ValveType::New();
+	m_Output->SetImage(resampler->GetOutput());
+	m_Output->SetP1(m_Transform->TransformPoint(m_Valve->GetP1()));
+	m_Output->SetP2(m_Transform->TransformPoint(m_Valve->GetP2()));
+	m_Output->UpdateIndexs();
+
+	if(m_FlipPoints)
+		FlipPoints(m_Output, m_Output);
+
+	if(m_Flip)
+		FlipValve(m_Output, m_Output);
+
+}
+
+
+// ------------------------------------------------------------------------
 void ValveNormaliser::FlipPoints(const ValveType::Pointer &input, ValveType::Pointer &output)
 {
 	ValveType::PointType tmp1, tmp2;
@@ -98,9 +125,8 @@ void ValveNormaliser::AlignValve(const ValveType::Pointer &input, ValveType::Poi
 
 
 	// tranlsation to the origin
-	typedef itk::CenteredAffineTransform<double, 3> TransformType;
-	TransformType::Pointer transform = TransformType::New();
-	transform->SetCenter(p1);
+	m_Transform = TransformType::New();
+	m_Transform->SetCenter(p1);
 
 	TransformType::OutputVectorType axis;
 	for(unsigned int i = 0; i < 3; i++)
@@ -122,12 +148,12 @@ void ValveNormaliser::AlignValve(const ValveType::Pointer &input, ValveType::Poi
 	itk::Vector<double,3> axis2 = itk::CrossProduct(vec1,vec2);
 	axis2.Normalize();
 
-	transform->Rotate3D(axis, angle);
+	m_Transform->Rotate3D(axis, angle);
 
 	typedef itk::ResampleImageFilter<ImageType, ImageType> ResamplerType;
 	ResamplerType::Pointer resampler = ResamplerType::New();
 	resampler->SetInput(image);
-	resampler->SetTransform(transform);
+	resampler->SetTransform(m_Transform);
 	resampler->SetOutputParametersFromImage(image);
 	resampler->Update();
 
@@ -135,8 +161,8 @@ void ValveNormaliser::AlignValve(const ValveType::Pointer &input, ValveType::Poi
 	// create the output 
 	if(!output) output = ValveLine<3>::New();
 	output->SetImage(resampler->GetOutput());
-	output->SetP1(transform->TransformPoint(input->GetP1()));
-	output->SetP2(transform->GetInverseTransform()->TransformPoint(input->GetP2()));
+	output->SetP1(m_Transform->TransformPoint(input->GetP1()));
+	output->SetP2(m_Transform->GetInverseTransform()->TransformPoint(input->GetP2()));
 	output->UpdateIndexs();
 }
 
