@@ -97,6 +97,7 @@ void TestData::ComputeImageMask(ImageGroup &images)
 	itk::ImageRegionConstIterator<ImageType> imIt(images.image, images.image->GetLargestPossibleRegion());
 
 
+
 	while(!imIt.IsAtEnd())
 	{
 		ImageType::IndexType index = imIt.GetIndex();

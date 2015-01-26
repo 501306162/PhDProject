@@ -13,9 +13,31 @@
 #include <vtkPlaneSource.h>
 #include <ValveIO.h>
 #include <CommonDefinitions.h>
+#include <ComputeProbImage.h>
 
 #include <Directory.h>
 
+// ------------------------------------------------------------------------
+void meanPlane(const PlaneCovarianceFilterType::Pointer &cov, const TestData::TransformType::Pointer &transform, 
+		VectorType &point, VectorType &normal)
+{
+	PointType mean;
+	itk::CovariantVector<double, 3> normVector;
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		mean[i] = cov->GetMean()[i];
+		normVector[i] = cov->GetMean()[i+3];		
+	}
+
+	mean = transform->TransformPoint(mean);
+	normVector = transform->TransformCovariantVector(normVector);
+
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		point(i) = mean[i];
+		normal(i) = normVector[i];
+	}
+}
 
 // ------------------------------------------------------------------------
 void createAlignedValve(const TestData::LineType &line, const ImageType::Pointer &image, 
@@ -475,6 +497,49 @@ double f2(const std::vector<double> &x, std::vector<double> &grad, void *f_data)
 }
 
 // ------------------------------------------------------------------------
+void computeProbImage2(const PatchParams &params, unsigned int pnum,
+	   	unsigned int id, std::string type, ClassifierMap &classifiers, 
+		const ValveType::Pointer &valve, const LabelType::Pointer &mask, RealImageType::Pointer &output)
+{
+	ComputeProbImage::Pointer computer = ComputeProbImage::New();
+	computer->SetInput(valve->GetImage());
+	computer->SetMask(mask);
+	computer->SetClassifier(classifiers["MV-"+type][pnum]);
+	computer->SetRadius(params.lbpRadius);
+	computer->SetNeighbors(params.lbpNeighbors);
+	computer->SetGridSize(params.lbpGridSize);
+
+
+	
+	ComputeProbImage::SizeType size;
+	size.Fill(params.featurePatchSize);
+	size[2] = 1;
+
+	ComputeProbImage::DistanceType distance;
+	distance.Fill(params.featurePatchDistance);
+	distance[2] = 0.0;
+
+	PointType p1 = valve->GetP1();
+	PointType p2 = valve->GetP2();
+	ComputeProbImage::VectorType vec = p2-p1;
+	vec.Normalize();
+
+	computer->SetPatchSize(size);
+	computer->SetPatchDistance(distance);
+	computer->SetLine(vec);
+
+	computer->Update();
+
+	output = computer->GetOutput();
+
+}
+
+
+
+
+
+
+// ------------------------------------------------------------------------
 void computeProbImage(const PatchParams &params, unsigned int pnum,
 	   	unsigned int id, std::string type, ClassifierMap &classifiers, 
 		const ValveType::Pointer &valve, const LabelType::Pointer &mask, RealImageType::Pointer &output)
@@ -490,6 +555,7 @@ void computeProbImage(const PatchParams &params, unsigned int pnum,
 	itk::ImageRegionIterator<LabelType> maskIt(mask, mask->GetLargestPossibleRegion());
 	itk::ImageRegionIterator<RealImageType> probIt(output, output->GetLargestPossibleRegion());
 	
+	unsigned int count = 0;
 	while(!maskIt.IsAtEnd())
 	{
 		if(maskIt.Get() == 255)
@@ -507,6 +573,7 @@ void computeProbImage(const PatchParams &params, unsigned int pnum,
 			
 			probIt.Set(probs(0,1));
 
+			count++;
 		}
 
 		

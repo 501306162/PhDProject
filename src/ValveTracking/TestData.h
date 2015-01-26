@@ -91,6 +91,7 @@ private:
 	TestGroup m_AlignedGroup;
 	vtkBoundingBox m_BoundingBox;
 	TransformType::Pointer m_InitialTransform;
+	vtkBoundingBox m_NewBox;
 };
 
 

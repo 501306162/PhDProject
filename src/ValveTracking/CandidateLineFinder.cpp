@@ -62,9 +62,54 @@ double CandidateLineFinder::LineCost(const PointPairType &p1, const PointPairTyp
 
 	double vecDiff = (d2-d1).norm();
 	
-	double cost = -log(p1Prob) - log(p2Prob) - log(lengthProb);
+	double cost = -log(p1Prob) - log(p2Prob) - log(lengthProb) + vecDiff;
 	
 	return cost;
+
+}
+
+// ------------------------------------------------------------------------
+void CandidateLineFinder::GetOutput(std::vector<OutputPointPair> &output, const unsigned int num)
+{
+	for(unsigned int i = 0; i < num; i++)
+	{
+		output.push_back(m_OutputList[i].second);
+	}
+}
+
+// ------------------------------------------------------------------------
+CandidateLineFinder::OutputPointPair CandidateLineFinder::GetWeightedOutput()
+{
+	double maxCost = 0.0;
+	double totalCost = 0.0;
+	for(unsigned int i = 0; i < m_OutputList.size(); i++)
+	{
+		double cost = m_OutputList[i].first;
+		if(cost > maxCost)
+			maxCost = cost;
+
+		totalCost += cost;
+	}
+
+
+	OutputPointPair output;
+	output.first.Fill(0);
+	output.second.Fill(0);
+
+	for(unsigned int i = 0; i < m_OutputList.size(); i++)
+	{
+		double cost = m_OutputList[i].first;
+		double weight = (maxCost - cost) / totalCost;
+
+		for(unsigned int j = 0; j < 3; j++)
+		{
+			output.first[j] += weight * m_OutputList[i].second.first[j];
+			output.second[j] += weight * m_OutputList[i].second.second[j];
+		}
+	}
+
+
+	return output;
 
 }
 

@@ -5,6 +5,7 @@ set(lib_srcs
 	"JsonConverter.cpp"
 	"ValveLine.cpp"
 	"CMRFileExtractor.cpp"
+	"PointData.cpp"
 	"lbp.cpp"
 	"PatchTrainingData.cpp"
 	"lbp_hist.cpp"
@@ -14,7 +15,7 @@ set(lib_srcs
 	"ValveIO.cpp"
 	"ResultViewer.cpp"
 	"PatchExtractor.cpp"
-
+	"ComputeProbImage.cpp"
 	"FeatureExtractor.cpp"
 	"LBPFeatureExtractor.cpp"
 	"ValvePointCandidateFinder.cpp"
@@ -38,6 +39,8 @@ set(lib_srcs
 
 set(lib_headers
 	"JsonConverter.h"
+	"PointData.h"
+	"ComputeProbImage.h"
 	"ResultViewer.h"
 	"PatchExtractor2.h"
 	"PatchExtractor2.hpp"

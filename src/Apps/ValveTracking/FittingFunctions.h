@@ -21,6 +21,7 @@
 #include <itkCovarianceSampleFilter.h>
 
 #include "ExtractTrainingFeatures.h"
+#include <PointData.h>
 
 using namespace vt;
 
@@ -43,6 +44,7 @@ typedef itk::Image<double, 3> RealImageType;
 
 typedef struct opt_data 
 {
+	PointData::Pointer pointData;
 	TestData::Pointer testData;
 	ClassifierMap classifiers;
 	PatchParams params;
@@ -69,6 +71,10 @@ void computeProbImage(const PatchParams &params, unsigned int pnum,
 	   	unsigned int id, std::string type, ClassifierMap &classifiers, 
 		const ValveType::Pointer &valve, const LabelType::Pointer &mask, RealImageType::Pointer &output);
 
+void computeProbImage2(const PatchParams &params, unsigned int pnum,
+	   	unsigned int id, std::string type, ClassifierMap &classifiers, 
+		const ValveType::Pointer &valve, const LabelType::Pointer &mask, RealImageType::Pointer &output);
+
 void saveClassifiers(const PatchParams &params, const unsigned int exclude, const ClassifierMap &classifiers);
 void loadClassifiers(const PatchParams & params, const unsigned int exclude, ClassifierMap &classifiers);
 void loadOrTrainClassifiers(const PatchParams & params, const unsigned int exclude,
@@ -82,6 +88,8 @@ void computeBoundingBox(const MatrixType &points, const TestData::TransformType:
 
 
 void computePlaneCovariance(const MatrixType &data, PlaneCovarianceFilterType::Pointer &cov);
+void meanPlane(const PlaneCovarianceFilterType::Pointer &cov, const TestData::TransformType::Pointer &transform, 
+		VectorType &point, VectorType &normal);
 
 void computeSegmentation(const ValveLine<3>::Pointer &input, LabelType::Pointer &segmentation, 
 		unsigned int segmentationPatchSize, unsigned int pointNumber);

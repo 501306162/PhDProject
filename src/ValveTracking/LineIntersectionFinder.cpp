@@ -3,9 +3,16 @@
 
 namespace vt
 {
+
 // ------------------------------------------------------------------------
-void LineIntersectionFinder::Compute()
+void LineIntersectionFinder::Compute2()
 {
+	double trace = 0.0;
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		trace += m_Image->GetDirection()(i,i);
+	}
+
 	// get the image normal and point 
 	VectorType imageNormal, imagePoint;
 	imageNormal(0) = m_Image->GetDirection()(0,2);
@@ -28,29 +35,80 @@ void LineIntersectionFinder::Compute()
 	double minT, maxT;
 	GetBoundingPlaneIntersections(intersectingLine, m_BoundingBox, minT, maxT);
 	
+
+
 	// set the output points
 	VectorType start = intersectingLine.pointAt(minT);
 	VectorType end = intersectingLine.pointAt(maxT);
 
+	
+
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		m_Output.p1[i] = start(i);
+		m_Output.p2[i] = end(i);
+	}
+
+
+	m_Output.direction = -intersectingLine.direction();
+}
+
+
+
+
+// ------------------------------------------------------------------------
+void LineIntersectionFinder::Compute()
+{
 	double trace = 0.0;
 	for(unsigned int i = 0; i < 3; i++)
 	{
 		trace += m_Image->GetDirection()(i,i);
 	}
 
+	// get the image normal and point 
+	VectorType imageNormal, imagePoint;
+	imageNormal(0) = m_Image->GetDirection()(0,2);
+	imageNormal(1) = m_Image->GetDirection()(1,2);
+	imageNormal(2) = m_Image->GetDirection()(2,2);
+
+	imagePoint(0) = m_Image->GetOrigin()[0];
+	imagePoint(1) = m_Image->GetOrigin()[1];
+	imagePoint(2) = m_Image->GetOrigin()[2];
+
+
+	// find the line at the intersection of the planes
+	PlaneType plane1(m_PlaneNormal, m_PlanePoint);
+	PlaneType plane2(imageNormal, imagePoint);
+	LineType intersectingLine;
+	FindIntersectingLine(plane1, plane2, intersectingLine);
+
+
+	// get the planes that bound the bounding box
+	double minT, maxT;
+	GetBoundingPlaneIntersections(intersectingLine, m_BoundingBox, minT, maxT);
+	
+
+
+	// set the output points
+	VectorType start = intersectingLine.pointAt(minT);
+	VectorType end = intersectingLine.pointAt(maxT);
+
+	
+
 	for(unsigned int i = 0; i < 3; i++)
 	{
 		if(trace > 0.0)
 		{
-			m_Output.p1[i] = end(i);
-			m_Output.p2[i] = start(i);
+		m_Output.p2[i] = intersectingLine.pointAt(0)(i);
+		m_Output.p1[i] = intersectingLine.pointAt(100)(i);
 		}
 		else
 		{
-			m_Output.p2[i] = end(i);
-			m_Output.p1[i] = start(i);
+		m_Output.p1[i] = intersectingLine.pointAt(0)(i);
+		m_Output.p2[i] = intersectingLine.pointAt(100)(i);
 		}
 	}
+
 
 	m_Output.direction = -intersectingLine.direction();
 }

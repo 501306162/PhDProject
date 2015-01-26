@@ -13,6 +13,7 @@
 #include <vtkVolume.h>
 #include <ValveLine.h>
 #include <vtkBoundingBox.h>
+#include <TestData.h>
 
 namespace vt
 {
@@ -33,6 +34,7 @@ public:
 	void SetPlane(VectorType &point, VectorType &normal) { m_Normal = normal; m_Point = point; }
 	void SetStartPlane(VectorType &point, VectorType &normal) { m_StartNormal = normal; m_StartPoint = point; }
 	void SetBoundingBox(vtkBoundingBox &box) { m_BoundingBox = box; }
+	void SetTransform(const TestData::TransformType::Pointer &trans) { m_Transform = trans; }
 	void SetUp();
 	void View();
 	void Save(const std::string &filename);
@@ -44,12 +46,13 @@ private:
 	ResultViewer(const Self&);
 	void operator=(const Self&);
 
-	void GetPlane(vtkSmartPointer<vtkPolyData> &poly);
+	void GetPlane(VectorType &point, VectorType &normal, ImageType::Pointer &image, vtkSmartPointer<vtkPolyData> &poly);
 	void GetImage(const ImageType::Pointer &in, vtkSmartPointer<vtkImageData> &image);
 	void GetLine(const ImageType::Pointer &image, VectorType &point, VectorType &normal, 
 			vtkSmartPointer<vtkImageData> &vtkImage,
 		   	vtkSmartPointer<vtkPolyData> &line);
 
+	TestData::TransformType::Pointer m_Transform;
 	std::vector<ImageType::Pointer> m_Images;
 	VectorType m_Point;
 	VectorType m_Normal;

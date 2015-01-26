@@ -37,6 +37,8 @@ public:
 
 	void Compute();
 	OutputPointPair GetOutput(unsigned int index=0) { return m_OutputList[index].second; }
+	void GetOutput(std::vector<OutputPointPair> &output, const unsigned int num=10);
+	OutputPointPair GetWeightedOutput();
 
 
 protected:

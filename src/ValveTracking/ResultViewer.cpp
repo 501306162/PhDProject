@@ -1,5 +1,7 @@
 #include "ResultViewer.h"
 
+#include <vtkPlane.h>
+#include <vtkCutter.h>
 #include <vtkPNGWriter.h>
 #include <vtkWindowToImageFilter.h>
 #include <itkImageToVTKImageFilter.h>
@@ -24,6 +26,7 @@
 #include <vtkProperty.h>
 #include <vtkImageProperty.h>
 #include <vtkCamera.h>
+#include <itkResampleImageFilter.h>
 
 namespace vt
 {
@@ -50,14 +53,18 @@ void ResultViewer::SetUp()
 
 
 
+
+
 		vtkSmartPointer<vtkImageData> image = vtkSmartPointer<vtkImageData>::New();
 		GetImage(m_Images[i], image);
 
 		vtkSmartPointer<vtkPolyData> line = vtkSmartPointer<vtkPolyData>::New();
-		GetLine(m_Images[i], m_Point, m_Normal, image,  line);
+		//GetLine(m_Images[i], m_Point, m_Normal, image,  line);
 
 		vtkSmartPointer<vtkPolyData> startLine = vtkSmartPointer<vtkPolyData>::New();
-		GetLine(m_Images[i], m_StartPoint, m_StartNormal, image,  startLine);
+		//GetLine(m_Images[i], m_StartPoint, m_StartNormal, image,  startLine);
+		GetPlane(m_Point, m_Normal, m_Images[i], line);
+		//GetPlane(m_StartPoint, m_StartNormal, m_Images[i], startLine);
 
 		vtkSmartPointer<vtkImageSliceMapper> imapper = vtkSmartPointer<vtkImageSliceMapper>::New();
 		imapper->SetInputData(image);
@@ -77,12 +84,12 @@ void ResultViewer::SetUp()
 		pactor->GetProperty()->SetColor(0,1,0);
 
 
-		vtkSmartPointer<vtkPolyDataMapper> pmapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
-		vtkSmartPointer<vtkActor> pactor2 = vtkSmartPointer<vtkActor>::New();
-		pmapper2->SetInputData(startLine);
-		pactor2->SetMapper(pmapper2);
-		pactor2->GetProperty()->SetLineWidth(2.0);
-		pactor2->GetProperty()->SetColor(1,0,0);
+		//vtkSmartPointer<vtkPolyDataMapper> pmapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
+		//vtkSmartPointer<vtkActor> pactor2 = vtkSmartPointer<vtkActor>::New();
+		//pmapper2->SetInputData(startLine);
+		//pactor2->SetMapper(pmapper2);
+		//pactor2->GetProperty()->SetLineWidth(2.0);
+		//pactor2->GetProperty()->SetColor(1,0,0);
 
 
 		// apply transform to the image actor
@@ -129,11 +136,10 @@ void ResultViewer::SetUp()
 		}
 		
 		pactor->SetPosition(linepos);
-
 		camera->SetPosition(pos);
 		camera->SetViewUp(up);
 
-		renderer->AddActor(pactor2);
+		//renderer->AddActor(pactor2);
 		renderer->AddActor(iactor);
 		renderer->AddActor(pactor);
 		renderer->SetActiveCamera(camera);
@@ -175,13 +181,40 @@ void ResultViewer::GetLine(const ImageType::Pointer &image, VectorType &point, V
 		   	vtkSmartPointer<vtkPolyData> &line)
 {
 	LineIntersectionFinder::Pointer finder = LineIntersectionFinder::New();
+
+	itk::Point<double, 3> tp;
+	itk::CovariantVector<double, 3> tn;
+
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		tp[i] = point(i);
+		tn[i] = normal(i);
+	}
+
+	tp = m_Transform->GetInverseTransform()->TransformPoint(tp);
+	tn = m_Transform->GetInverseTransform()->TransformCovariantVector(tn);
+
+	VectorType np, nn;
+	for(unsigned int i = 0; i < 3; i++)
+	{
+		np(i) = tp[i];
+		nn(i) = tn[i];
+	}
+
 	finder->SetImage(image);
-	finder->SetPlane(normal, point);
+	finder->SetPlane(nn, np);
+
+	vtkBoundingBox newBox;
+
+
 	finder->SetBoundingBox(m_BoundingBox);
-	finder->Compute();	
+	finder->Compute2();	
 
 
 	LineIntersectionFinder::OutputLineType tmpLine = finder->GetOutput();
+
+	tmpLine.p1 = m_Transform->TransformPoint(tmpLine.p1);
+	tmpLine.p2 = m_Transform->TransformPoint(tmpLine.p2);
 
 	vtkSmartPointer<vtkLineSource> lineSource = vtkSmartPointer<vtkLineSource>::New();
 	lineSource->SetPoint1(tmpLine.p1.GetDataPointer());
@@ -208,15 +241,16 @@ void ResultViewer::GetImage(const ImageType::Pointer &in,vtkSmartPointer<vtkImag
 
 
 // ------------------------------------------------------------------------
-void ResultViewer::GetPlane(vtkSmartPointer<vtkPolyData> &poly)
+void ResultViewer::GetPlane(VectorType &point, VectorType &normal, 
+		ImageType::Pointer &image, vtkSmartPointer<vtkPolyData> &outpoly)
 {
 	vtkSmartPointer<vtkPlaneSource> source = vtkSmartPointer<vtkPlaneSource>::New();
-	source->SetCenter(m_Point(0), m_Point(1), m_Point(2));
-	source->SetNormal(m_Normal(0), m_Normal(1), m_Normal(3));
+	source->SetCenter(point(0), point(1), point(2));
+	source->SetNormal(normal(0), normal(1), normal(2));
 	source->SetResolution(1,1);
 	source->Update();
 
-	poly = vtkSmartPointer<vtkPolyData>::New();
+	vtkSmartPointer<vtkPolyData> poly = vtkSmartPointer<vtkPolyData>::New();
 	poly->DeepCopy(source->GetOutput());
 
 	vtkSmartPointer<vtkPoints> p = poly->GetPoints();
@@ -245,6 +279,19 @@ void ResultViewer::GetPlane(vtkSmartPointer<vtkPolyData> &poly)
 		p->SetPoint(j,pin);
 
 	}
+
+
+	vtkSmartPointer<vtkCutter> cutter = vtkSmartPointer<vtkCutter>::New();
+	cutter->SetInputData(poly);
+
+	vtkSmartPointer<vtkPlane> cutPlane = vtkSmartPointer<vtkPlane>::New();
+	cutPlane->SetNormal(image->GetDirection()(0,2), image->GetDirection()(1,2), image->GetDirection()(2,2));
+	cutPlane->SetOrigin(image->GetOrigin()[0], image->GetOrigin()[1], image->GetOrigin()[2]);
+	cutter->SetCutFunction(cutPlane);
+
+	cutter->Update();
+	outpoly= vtkSmartPointer<vtkPolyData>::New();
+	outpoly->DeepCopy(cutter->GetOutput());
 
 }
 

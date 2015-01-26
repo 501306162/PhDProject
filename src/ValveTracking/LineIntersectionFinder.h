@@ -36,6 +36,7 @@ public:
 	void SetBoundingBox(const vtkBoundingBox &box) { m_BoundingBox = box; }
 	void SetPlane(const VectorType &normal, const VectorType &point) { m_PlaneNormal = normal; m_PlanePoint = point; }
 	void Compute();
+	void Compute2();
 	OutputLineType GetOutput() const { return m_Output; }
 
 protected:
