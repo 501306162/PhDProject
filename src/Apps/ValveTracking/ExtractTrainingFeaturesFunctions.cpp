@@ -24,6 +24,7 @@ void processDataSet(const Params &params, const unsigned int folderNumber,
 	// get the list of valve filenames in this subdirectory
 	const std::string valveDirectory = params.valveSubDirectories[folderNumber]; 
 	const std::string valveType = params.valveSubTypes[folderNumber];
+	std::cout << valveDirectory << std::endl;
 	utils::Directory::FilenamesType inputFilenames = utils::Directory::GetFiles(valveDirectory, ".txt");
 	std::sort(inputFilenames.begin(), inputFilenames.end(), fname_sort);
 
@@ -38,6 +39,12 @@ void processDataSet(const Params &params, const unsigned int folderNumber,
 	unsigned int negativeP1FeatureCount = 0, positiveP1FeatureCount = 0;
 	unsigned int negativeP2FeatureCount = 0, positiveP2FeatureCount = 0;
 
+	std::cout << "Hi" << std::endl;
+	std::cout << inputFilenames.size() << std::endl;
+	for(unsigned int i = 0; i < inputFilenames.size(); i++)
+	{
+		std::cout << inputFilenames[i] << std::endl;
+	}
 
 	// these will hold the information about which points belong to who
 	OwnerLookupType positiveOwnerP1Lookup, negativeOwnerP1Lookup;

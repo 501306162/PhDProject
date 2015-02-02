@@ -346,7 +346,6 @@ void loadOrTrainClassifiers(const PatchParams & params, const unsigned int exclu
 	std::stringstream ss;
 	ss << exclude << "-" << params.valveSubTypes[0] << "-" << params.timeStep << "-0.cls";
 	std::string testFilename = utils::Directory::GetPath(params.outputDirectory, ss.str());
-	std::cout << ss.str() << std::endl;
 	if(utils::Directory::FileExists(testFilename))
 	{
 		loadClassifiers(params, exclude, classifiers);

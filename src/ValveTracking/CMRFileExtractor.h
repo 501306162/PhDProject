@@ -35,6 +35,12 @@ public:
 	ImageType::Pointer GetR3CImage(const unsigned int index);
 	ImageType::Pointer GetStackImage(const unsigned int index);
 
+	bool Has2CImage() { return Exist(m_2CImage); }
+	bool Has3CImage() { return Exist(m_3CImage); }
+	bool Has4CImage() { return Exist(m_4CImage); }
+	bool HasR2CImage() { return Exist(m_R2CImage); }
+	bool HasStackImage() { return Exist(m_Stack); }
+
 	itkSetMacro(Flip, bool);
 
 	void FlipImage(const ImageType::Pointer &input, ImageType::Pointer &output);
@@ -51,6 +57,8 @@ protected:
 private:
 	CMRFileExtractor(const Self&);
 	void operator=(const Self&);
+
+	bool Exist(ImageSeriesType::Pointer &image);
 
 	std::string m_FolderName;
 

@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # CMAKE file for the source directory
 # ----------------------------------------------------------------------
-
+add_definitions(-DVCL_CAN_STATIC_CONST_INIT_FLOAT)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # ----------------------------------------------------------------------
@@ -12,6 +12,7 @@ find_package(Qt4 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
+#list( APPEND CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
 
 message(${QT_INCLUDE_DIR})
 

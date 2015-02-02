@@ -4,6 +4,7 @@ set(lib_name "ValveTracking")
 set(lib_srcs
 	"JsonConverter.cpp"
 	"ValveLine.cpp"
+	"PointLocations.cpp"
 	"CMRFileExtractor.cpp"
 	"PointData.cpp"
 	"lbp.cpp"
@@ -15,6 +16,7 @@ set(lib_srcs
 	"ValveIO.cpp"
 	"ResultViewer.cpp"
 	"PatchExtractor.cpp"
+	"InitialParticleGenerator.cpp"
 	"ComputeProbImage.cpp"
 	"FeatureExtractor.cpp"
 	"LBPFeatureExtractor.cpp"
@@ -38,6 +40,8 @@ set(lib_srcs
 
 
 set(lib_headers
+	"PointLocations.h"
+	"InitialParticleGenerator.h"
 	"JsonConverter.h"
 	"PointData.h"
 	"ComputeProbImage.h"

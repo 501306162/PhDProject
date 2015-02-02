@@ -17,7 +17,7 @@ PatchTrainingData::Pointer PatchTrainingData::Load(const std::string &configFile
 // ------------------------------------------------------------------------
 void PatchTrainingData::LoadData(const std::string &configFilename)
 {
-	PatchExtractorParameters params(configFilename);
+	PatchExtractorParameters params(configFilename, true);
 
 	// loop through the sub types and load the data
 	for(unsigned int i = 0; i < params.valveSubTypes.size(); i++)

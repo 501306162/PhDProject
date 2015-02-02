@@ -138,6 +138,14 @@ void CMRFileExtractor::Extract()
 }
 
 // ------------------------------------------------------------------------
+bool CMRFileExtractor::Exist(ImageSeriesType::Pointer &image)
+{
+	if(!image) return false;
+	return true;
+}
+
+
+// ------------------------------------------------------------------------
 bool CMRFileExtractor::Matches(const QString &filename, const QStringList &filters)
 {
 	for (int i = 0; i < filters.size(); ++i)

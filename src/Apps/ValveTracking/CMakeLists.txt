@@ -2,10 +2,12 @@ set(APP_NAMES
 	"ParseResults"
 	"ValveAlignment"
 	"PatchTest"
-
 	#"FeatureTest"
 	"ROITest"
+	"TMCheck"
+	#"CreatePointLocations"
 	"TrainClassifiers"
+	#"HaarPatches"
 	"ComputeNewPlanes"
 	"SegmentROIs"
 	"ExtractPatch"
@@ -60,6 +62,11 @@ add_executable(Fitting2 ${Fitting2_SRCS})
 target_link_libraries(Fitting2 ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
 install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/Fitting2" DESTINATION "${bin_path}/ValveTracking")
 
+
+set(PF_SRCS "PF.cpp" "PFFunctions.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+add_executable(PF ${PF_SRCS})
+target_link_libraries(PF ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/PF" DESTINATION "${bin_path}/ValveTracking")
 
 
 set(MeanShiftTest_SRCS "MeanShiftTest.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")

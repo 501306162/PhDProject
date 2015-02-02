@@ -24,7 +24,7 @@ int main(int argc, char ** argv)
 {
 	const std::string inputDirectory = argv[1];
 	utils::Directory::FilenamesType dirs = utils::Directory::GetDirectories(inputDirectory);
-	PatchExtractorParameters params(argv[2]);
+	PatchExtractorParameters params(argv[2], true);
 
 
 	// load the patch data 
@@ -32,14 +32,13 @@ int main(int argc, char ** argv)
 
 
 
-	for(params.timeStep = 0; params.timeStep < params.numberOfTimeSteps; params.timeStep++)
-	{
-		ClassifierMap classifiers;
-		loadOrTrainClassifiers(params, 1000, patches, classifiers);
-	}
+	//for(params.timeStep = 0; params.timeStep < params.numberOfTimeSteps; params.timeStep++)
+	//{
+		//ClassifierMap classifiers;
+		//loadOrTrainClassifiers(params, 1000, patches, classifiers);
+	//}
 	
 
-	/*
 	for(unsigned int i = 0; i < dirs.size(); i++)
 	{
 
@@ -57,7 +56,6 @@ int main(int argc, char ** argv)
 
 	}
 
-	*/
 
 
 	return 0;

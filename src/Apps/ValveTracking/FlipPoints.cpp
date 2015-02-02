@@ -7,6 +7,37 @@
 using namespace vt;
 int main(int argc, char ** argv)
 {
+
+	const std::string filename = argv[1];
+	std::string fname = utils::Directory::GetFileName(filename);
+
+	const std::string outputName = QString::fromStdString(filename).replace(".txt","").toStdString();
+
+	ValveSequenceReader<3>::Pointer reader = ValveSequenceReader<3>::New();
+	reader->SetFileName(filename);
+
+
+	ValveSequence<3>::Pointer sequence = reader->GetOutput();
+	ValveSequence<3>::Pointer output = ValveSequence<3>::New();
+	for(unsigned int j = 0; j < sequence->GetNumberOfLines(); j++)
+	{
+		ValveLine<3>::Pointer line = sequence->GetValveLine(j);			
+		ValveLine<3>::PointType p1 = line->GetP1();
+		ValveLine<3>::PointType p2 = line->GetP2();
+		line->SetP1(p2);
+		line->SetP2(p1);
+		line->UpdateIndexs();
+
+		output->AddValveLine(line);
+	}
+
+
+	ValveSequenceWriter<3>::Pointer writer = ValveSequenceWriter<3>::New();
+	writer->SetInput(output);
+	writer->SetFileName(outputName);
+	writer->Write();
+
+	/*
 	utils::Directory::FilenamesType filenames = utils::Directory::GetFiles(argv[1], ".txt");
 	for(unsigned int i = 0; i < filenames.size(); i++)
 	{
@@ -51,6 +82,7 @@ int main(int argc, char ** argv)
 	}
 
 
+	*/
 
 	return 0;
 }

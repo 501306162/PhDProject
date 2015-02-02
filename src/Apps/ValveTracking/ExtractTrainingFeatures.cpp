@@ -42,13 +42,13 @@ void writePNG(const ImageType::Pointer &patch, const std::string filename);
 int main(int argc, char **argv)
 {
 	// parse the input configuration
-	Params params(argv[1]);
+	Params params(argv[1], true);
 	params.print();
 
 
 
 	// the outer loop is for the time steps 
-	for(unsigned int timeStep = 0; timeStep < params.numberOfTimeSteps; timeStep++)
+	for(unsigned int timeStep = 20; timeStep < params.numberOfTimeSteps; timeStep++)
 	{
 		// first we need to iterate through each of the input folders
 		for(unsigned int folderNumber = 0; folderNumber < params.valveSubDirectories.size(); folderNumber++)

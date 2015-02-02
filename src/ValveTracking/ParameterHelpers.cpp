@@ -44,8 +44,11 @@ void PatchExtractorParameters::print()
 	std::cout << std::endl;
 }
 
+
+
+
 // ------------------------------------------------------------------------
-PatchExtractorParameters::PatchExtractorParameters(const std::string &filename)
+PatchExtractorParameters::PatchExtractorParameters(const std::string &filename, bool all)
 {
 
 	utils::ConfigParser configs = utils::ConfigParser(filename);
@@ -54,6 +57,11 @@ PatchExtractorParameters::PatchExtractorParameters(const std::string &filename)
 	this->valveType = configs.strValue("valve_type");
 	this->name = configs.strValue("name");
 	
+	if(all)
+	{
+		this->valveSubTypes.push_back("TP-R2C");
+		this->valveSubTypes.push_back("TP-4C");
+	}
 
 	// create the list of valve directories
 	if(this->valveType == "MV")
@@ -62,16 +70,12 @@ PatchExtractorParameters::PatchExtractorParameters(const std::string &filename)
 		this->valveSubTypes.push_back("MV-3C");
 		this->valveSubTypes.push_back("MV-4C");
 	}
-	else if(this->valveType == "TP")
-	{
-		this->valveSubTypes.push_back("TP-4C");
-		this->valveSubTypes.push_back("TP-RC3");
-	}
 	else
 	{	
 		std::cout << "Valve Type: " << this->valveType << " not recognised" << std::endl;
 		exit(1);
 	}
+
 
 	for(unsigned int i = 0; i < this->valveSubTypes.size(); i++)
 	{

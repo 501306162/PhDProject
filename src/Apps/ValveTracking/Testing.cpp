@@ -4,48 +4,80 @@
 #include <ValveIO.h>
 #include <TrainingData.h>
 #include <SVMClassifier.h>
+#include <Directory.h>
+#include <ParameterHelpers.h>
+#include <itkPNGImageIO.h>
+#include <itkImageFileWriter.h>
+#include <QString>
 
+#include <itkRescaleIntensityImageFilter.h>
+#include <PatchExtractor2.h>
 
 using namespace vt;
 int main(int argc, char **argv)
 {
-	// load the data matrix 
-	std::string dataMatrixFilename = argv[1];
 
-	std::cout << "Loading Data" << std::endl;
-	TrainingData::Pointer data = TrainingData::Load(dataMatrixFilename);
-	std::vector<int> owners = data->OwnerList();
-	std::sort(owners.begin(), owners.end());
+	const std::string folderName = argv[1];
+	utils::Directory::FilenamesType filenames = utils::Directory::GetFiles(folderName, ".txt");
 
-	for(unsigned int i = 0; i < owners.size()-1; i++)
+	//PatchExtractorParameters params(argv[2]);
+
+
+	for(unsigned int i = 0; i < filenames.size(); i++)
 	{
-		int testData = owners[i];
-		
-		typedef TrainingData::MatrixType MatrixType;
-		typedef TrainingData::IntMatrixType IntMatrixType;
-		MatrixType X, X_test;
-		IntMatrixType y, y_test;
-		data->GetTrainingData(testData,X,y);
-		data->GetTestData(testData, X_test, y_test);
+		const std::string filename = filenames[i];
+		std::string fname = utils::Directory::GetFileName(filename);
+		unsigned int id = QString::fromStdString(fname).replace("d","").replace(".txt","").toInt();
 
 
-		//std::cout << "Training SVM" << std::endl;
-		SVMClassifier::Pointer classifier = SVMClassifier::New();
-		classifier->Train(X,y);
+		ValveSequenceReader<3>::Pointer reader = ValveSequenceReader<3>::New();
+		reader->SetFileName(filenames[i]);
+		ValveSequence<3>::Pointer sequence = reader->GetOutput();
 
-		MatrixType probs;
-		IntMatrixType classes;
+		ValveLine<3>::Pointer line = sequence->GetValveLine(0);
 
-		unsigned int lastIndex = X_test.rows()-1;
-		MatrixType xNew = X_test.block(lastIndex,0,1,X_test.cols());
-		//std::cout << "Testing" << std::endl;
-		classifier->PredictProbability(xNew, classes, probs);
+		typedef ValveLine<3>::ImageType ImageType;
 
-		std::cout << "Index: " <<  testData <<  " Class: " << classes(0,0) <<  " Probs: " << probs(0,0) << " / " << probs(0,1) << std::endl;
+		typedef PatchExtractor2<ImageType> ExtractorType;
+		ExtractorType::Pointer extractor = ExtractorType::New();
 
-	
+		ExtractorType::VectorType direction = line->GetP2()-line->GetP1();
+		ExtractorType::SizeType size;
+		size.Fill(300);
+		size[2] = 1;
+
+		ExtractorType::DistanceType distance;
+		distance.Fill(200);
+		distance[2] = 0;
+
+		extractor->SetSize(size);
+		extractor->SetDistance(distance);
+		extractor->SetLine(direction);
+		extractor->SetInput(line->GetImage());
+		extractor->SetCenter(line->GetP1());
+
+		ImageType::Pointer patch = extractor->GetOutput();
+
+		typedef itk::Image<unsigned char, 3> OutputType;
+		typedef itk::RescaleIntensityImageFilter<ImageType, OutputType> RescalerType;
+		RescalerType::Pointer rescaler = RescalerType::New();
+		rescaler->SetInput(patch);
+		rescaler->SetOutputMaximum(255);
+		rescaler->SetOutputMinimum(0);
+		rescaler->Update();
+
+
+		std::stringstream ss;
+		ss << id << ".png";
+
+		typedef itk::ImageFileWriter<OutputType> WriterType;
+		WriterType::Pointer writer = WriterType::New();
+		writer->SetInput(rescaler->GetOutput());
+		writer->SetImageIO(itk::PNGImageIO::New());
+		writer->SetFileName(ss.str());
+		writer->Update();
+
 	}
-
 
 
 	return 0;

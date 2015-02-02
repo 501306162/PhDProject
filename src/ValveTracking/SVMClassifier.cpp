@@ -6,6 +6,30 @@ namespace vt
 void print_null(const char *s) {}
 
 // ------------------------------------------------------------------------
+SVMClassifier::SVMClassifier()
+{
+	m_Model = NULL;
+	m_Problem = NULL;
+}
+
+
+// ------------------------------------------------------------------------
+SVMClassifier::~SVMClassifier()
+{
+	svm_free_and_destroy_model(&m_Model);
+	if(m_Problem)
+	{
+		delete m_Problem->y;
+		for(int i = 0; i < m_Problem->l; i++)
+		{
+			delete m_Problem->x[i];
+		}
+		delete m_Problem->x;
+	}
+}
+
+
+// ------------------------------------------------------------------------
 void SVMClassifier::Train(const MatrixType &X, const IntMatrixType &y)
 {
 	svm_set_print_string_function(&print_null);
@@ -49,6 +73,7 @@ void SVMClassifier::Train(const MatrixType &X, const IntMatrixType &y)
 
 	//std::cout << "Training..." << std::endl;
 	m_Model = svm_train(m_Problem, params);
+	svm_destroy_param(params);
 
 }
 
@@ -150,17 +175,17 @@ void SVMClassifier::BuildNode(const MatrixType &row, NodeType * nodes)
 	{
 		if(row(0,i) > 0.0)
 		{
-			NodeType *n = new NodeType;
-			n->index = i;
-			n->value = row(0,i);
-			nodes[count] = *n;
+			NodeType n;
+			n.index = i;
+			n.value = row(0,i);
+			nodes[count] = n;
 			count++;
 		}
 	}
 
-	NodeType * endNode = new NodeType;
-	endNode->index = -1;
-	nodes[count] = *endNode;
+	NodeType endNode;
+	endNode.index = -1;
+	nodes[count] = endNode;
 }
 
 }

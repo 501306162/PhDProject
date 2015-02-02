@@ -34,8 +34,8 @@ public:
 
 
 protected:
-	SVMClassifier() : m_Problem(NULL) {}
-	virtual ~SVMClassifier() {}
+	SVMClassifier();
+	virtual ~SVMClassifier(); 
 
 	
 

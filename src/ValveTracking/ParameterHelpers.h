@@ -31,7 +31,7 @@ public:
 	unsigned int featureSize;
 
 	PatchExtractorParameters() {}
-	PatchExtractorParameters(const std::string &configFilename);
+	PatchExtractorParameters(const std::string &configFilename, bool all=false);
 	std::string getOutputFilename(const unsigned int time, const std::string &type);
 	void print();
 };
