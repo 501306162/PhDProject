@@ -17,6 +17,7 @@ set(APP_NAMES
 	"ValveDataAppender"
 	"FlipPoints"
 	"PlaneCalculator"
+	"CreatePatches"
 	"ComputeAlignedPlanes"
 	"ComputeLineLengths"
 	#"ModelTest"
@@ -51,28 +52,44 @@ target_link_libraries(ExtractTrainingFeatures ${ITK_LIBRARIES} ${QT_LIBRARIES} q
 install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/ExtractTrainingFeatures" DESTINATION "${bin_path}/ValveTracking")
 
 
+set(BigProgs 
+	"Fitting2"
+	"SMOTEer"
+	"BadTracking"
+	"MeanShiftTest"
+	"PF")
+
+
+foreach(Prog ${BigProgs})
+	add_executable(${Prog} "${Prog}.cpp"  "PFFunctions.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+	target_link_libraries(${Prog} ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+	install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${Prog}" DESTINATION "${bin_path}/ValveTracking")
+endforeach()
 
 #set(Fitting_SRCS "Fitting.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
 #add_executable(Fitting ${Fitting_SRCS})
 #target_link_libraries(Fitting ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
 #install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/Fitting" DESTINATION "${bin_path}/ValveTracking")
 
-set(Fitting2_SRCS "Fitting2.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
-add_executable(Fitting2 ${Fitting2_SRCS})
-target_link_libraries(Fitting2 ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
-install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/Fitting2" DESTINATION "${bin_path}/ValveTracking")
+#set(Fitting2_SRCS "Fitting2.cpp" )
+#add_executable(Fitting2 ${Fitting2_SRCS})
 
 
-set(PF_SRCS "PF.cpp" "PFFunctions.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
-add_executable(PF ${PF_SRCS})
-target_link_libraries(PF ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
-install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/PF" DESTINATION "${bin_path}/ValveTracking")
+#set(PF_SRCS "PF.cpp" "PFFunctions.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+#add_executable(PF ${PF_SRCS})
+#target_link_libraries(PF ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+#install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/PF" DESTINATION "${bin_path}/ValveTracking")
 
 
-set(MeanShiftTest_SRCS "MeanShiftTest.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
-add_executable(MeanShiftTest ${MeanShiftTest_SRCS})
-target_link_libraries(MeanShiftTest ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
-install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/MeanShiftTest" DESTINATION "${bin_path}/ValveTracking")
+#set(MeanShiftTest_SRCS "MeanShiftTest.cpp" "FittingFunctions.cpp" "ExtractTrainingFeaturesFunctions.cpp")
+#add_executable(MeanShiftTest ${MeanShiftTest_SRCS})
+#target_link_libraries(MeanShiftTest ${ITK_LIBRARIES} ${QT_LIBRARIES} qjson nlopt MRFLib Utils ValveTracking Manifold)
+#install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/MeanShiftTest" DESTINATION "${bin_path}/ValveTracking")
+
+
+
+
+
 
 qt4_wrap_cpp(headers_moc "main_window.h")
 add_executable(DataSorter "DataSorter.cpp" "main_window.cpp" ${headers_moc})

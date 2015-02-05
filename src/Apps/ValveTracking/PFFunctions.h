@@ -41,6 +41,7 @@ typedef struct _in_data_
 	TransformType::Pointer transform;
 	unsigned int id;
 
+
 } InputData;
 
 void loadGroundTruth(const InputData &input, GTMap &groundTruth);
@@ -59,5 +60,8 @@ void updateParticles2(const PCostList &input,   InputData &inputData,
 double prodCost(const PCostMap &map);
 void computeWeigthedMeanPoints(const ParticleCostList &input, PointType &p1, PointType &p2);
 void compareValve(const ValveLine<3>::Pointer &input, const PointType &p1, const PointType &p2, std::vector<double> &dist);
+
+void computeParticleCosts(const PatchParams &params, const ImageType::Pointer &image,
+		const ClassifierList &classifiers, const ParticleList &particles, ParticleCostList &costs); 
 
 #endif

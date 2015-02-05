@@ -38,6 +38,76 @@ void createInitialParticles(const InputData &data, PointLocations::Pointer &poin
 	particles = particleGenerator->GetMapOutput();
 }
 
+// ------------------------------------------------------------------------
+void computeParticleCosts(const PatchParams &params, const ImageType::Pointer &image,
+		const ClassifierList &classifiers, const ParticleList &particles, ParticleCostList &costs)
+{
+	typedef std::pair<std::pair<int, int>, double> MatrixIndexPair;
+	typedef std::map<std::pair<int, int>, double> MatrixIndexMap;
+	MatrixIndexMap ind1, ind2;
+
+	// compute the particle cost
+	ParticleCostList particleCosts;
+	for(unsigned int i = 0; i < particles.size(); i++)
+	{
+		const Particle &p = particles.at(i);
+		MatrixType p1Feature, p2Feature;
+		ValveLine<3>::Pointer valve = ValveLine<3>::New();
+		valve->SetP1(p.p1);
+		valve->SetP2(p.p2);
+		valve->SetImage(image);
+		valve->UpdateIndexs();
+
+
+		itk::ContinuousIndex<double, 3> pind1, pind2;
+		image->TransformPhysicalPointToContinuousIndex(p.p1, pind1);
+		image->TransformPhysicalPointToContinuousIndex(p.p2, pind2);
+
+		std::pair<int, int> key1((int) (pind1[0] * 2.0) , (int) (2.0 *pind1[1]) );
+		std::pair<int, int> key2((int) (pind2[0] * 2.0) , (int) (2.0 *pind2[1]) );
+
+		double p1Prob, p2Prob;
+		if(ind1.count(key1))
+		{
+			p1Prob = ind1[key1];
+		}
+		else
+		{
+			extractLBPFeature(params, valve, p.p1, p1Feature);
+			IntMatrixType classes;
+			MatrixType probs;
+			classifiers[0]->PredictProbability(p1Feature, classes, probs);
+			p1Prob = probs(0,1);
+			ind1[key1] = p1Prob;
+		}
+
+
+		if(ind2.count(key2))
+		{
+			p2Prob = ind2[key2];
+		}
+		else
+		{
+			extractLBPFeature(params, valve, p.p2, p2Feature);
+			IntMatrixType classes;
+			MatrixType probs;
+			classifiers[1]->PredictProbability(p2Feature, classes, probs);
+			p2Prob = probs(0,1);
+			ind2[key2] = p2Prob;
+		}
+
+		double prob = p1Prob * p2Prob; // * centerProb;
+
+		PProbs ou;
+		ou.first = prob;
+		ou.second = p;
+		costs.push_back(ou);
+	}
+
+}
+
+
+
 
 // ------------------------------------------------------------------------
 double prodCost(const PCostMap &map)

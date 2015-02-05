@@ -37,6 +37,7 @@ public:
 	static FilenameType GetPath(const std::string &base, const std::string &ext);
 	static bool FileExists(const std::string &filename);
 	static FilenameType GetFileName(const std::string &filepath);
+	static bool MkDir(const std::string &path);
 
 protected:
 	Directory();

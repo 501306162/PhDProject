@@ -32,6 +32,15 @@ Directory::FilenameType Directory::GetPath(const std::string &base, const std::s
 
 }
 
+// ------------------------------------------------------------------------
+bool Directory::MkDir(const std::string &path )
+{
+	QDir d(path.c_str());
+	d.mkpath(path.c_str());
+
+	return true;
+}
+
 
 // ------------------------------------------------------------------------
 bool Directory::FileExists(const std::string &filename)
